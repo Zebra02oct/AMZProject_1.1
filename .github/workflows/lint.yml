@@ -48,7 +48,7 @@ jobs:
         run: npm ci
 
       - name: Run PHP Linting (Pint)
-        run: vendor/bin/pint --test
+        run: php ./vendor/bin/pint --test
 
       # Uncomment untuk auto-commit perubahan formatting
       # - name: Auto Commit Changes

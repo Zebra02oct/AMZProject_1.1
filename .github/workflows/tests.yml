@@ -38,7 +38,7 @@ jobs:
       - name: Create SQLite Database
         run: touch database/database.sqlite
 
-      - name: Install Dependencies
+      - name: Install PHP Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Copy Environment File
@@ -51,4 +51,4 @@ jobs:
         run: npm run build
 
       - name: Run Tests
-        run: ./vendor/bin/pest
+        run: php ./vendor/bin/pest
