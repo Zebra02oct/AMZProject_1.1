@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-class User extends Authenticatable // implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -23,8 +24,8 @@ class User extends Authenticatable // implements MustVerifyEmail
         'email',
         'password',
         'role',
+        'nis',
     ];
-
 
     /**
      * The attributes that should be hidden for serialization.
@@ -34,38 +35,27 @@ class User extends Authenticatable // implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'tokens.*',
     ];
 
-    public function isAdmin()
+    public function isAdmin(): bool
     {
         return $this->role === 'Admin';
     }
 
-    public function isGuru()
+    public function isGuru(): bool
     {
         return $this->role === 'Guru';
     }
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
 
-    /**
-     * Get the user's initials
-     */
     public function initials(): string
     {
-        return Str::of($this->name)
+        return (string) Str::of($this->name ?? '')
+            ->trim()
             ->explode(' ')
-            ->map(fn(string $name) => Str::of($name)->substr(0, 1))
+            ->filter()
+            ->map(fn(string $part) => Str::substr($part, 0, 1))
+            ->take(2)
             ->implode('');
     }
 }

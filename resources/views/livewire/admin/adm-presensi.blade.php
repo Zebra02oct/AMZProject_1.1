@@ -59,7 +59,7 @@
                         class="text-center p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                         <div class="text-sm font-medium text-green-800 dark:text-green-200 mb-1">✅ Sesi Aktif</div>
                         <div class="text-xs text-green-700 dark:text-green-300">Berakhir:
-                            {{ $activeSession->expired_at->diffForHumans() }}</div>
+                            {{ $activeSession->expired_at?->diffForHumans() ?? '-' }}</div>
                     </div>
                     <button wire:click="closeSession"
                         class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg transition-all">
@@ -85,10 +85,10 @@
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">QR Code Presensi</h3>
             @if ($qrData)
                 <div x-data="qrGenerator('{{ $qrData }}')" class="space-y-4">
-                    <canvas id="qrcode"
+                    <div id="qrcode"
                         class="mx-auto mb-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border-4 border-dashed border-gray-300 dark:border-gray-600"
-                        width="256" height="256">
-                    </canvas>
+                        style="width:256px; height:256px; display:flex; align-items:center; justify-content:center;">
+                    </div>
                     <div>
                         <div
                             class="font-mono bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded text-sm text-gray-800 dark:text-gray-200">
@@ -258,11 +258,11 @@
                             </td>
                             <td
                                 class="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-green-600 dark:text-green-400">
-                                {{ $session->presensi->where('status', 'hadir')->count() }}
+                                {{ $session->presensis?->firstWhere('status', 'hadir')->count ?? 0 }}
                             </td>
                             <td
                                 class="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-yellow-600 dark:text-yellow-400">
-                                {{ $session->presensi->where('status', 'terlambat')->count() }}
+                                {{ $session->presensis?->firstWhere('status', 'terlambat')->count ?? 0 }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                                 <button
@@ -348,10 +348,10 @@
                     }
 
                     // Check if QRCode library is available
-                    if (typeof QRCode === 'undefined' || !window.QRCodeLoaded) {
+                    if ((!window.qrcode || !window.qrcode.toCanvas) && (typeof window.QRCode === 'undefined' || !window
+                            .QRCodeLoaded)) {
                         console.log('QRCode library not loaded yet, retrying... (' + (retryCount + 1) + '/10)');
                         if (retryCount < 10) {
-                            // Retry after a delay
                             setTimeout(() => this.generateQR(retryCount + 1), 1000);
                         } else {
                             console.error('QRCode library failed to load after 10 retries');
@@ -360,21 +360,40 @@
                     }
 
                     console.log('QRCode library is available, generating QR code for:', this.data);
-                    const canvas = document.getElementById('qrcode');
-                    if (!canvas) {
-                        console.error('QR code canvas element not found');
+                    const qrContainer = document.getElementById('qrcode');
+                    if (!qrContainer) {
+                        console.error('QR code element not found');
                         return;
                     }
 
+                    qrContainer.innerHTML = '';
+                    const canvas = document.createElement('canvas');
+                    qrContainer.appendChild(canvas);
+
                     try {
-                        new QRCode(canvas, {
-                            text: this.data,
-                            width: 256,
-                            height: 256,
-                            colorDark: "#000000",
-                            colorLight: "#ffffff",
-                            correctLevel: QRCode.CorrectLevel.H
-                        });
+                        if (window.qrcode && window.qrcode.toCanvas) {
+                            window.qrcode.toCanvas(canvas, this.data, {
+                                width: 256,
+                                margin: 1
+                            }, (error) => {
+                                if (error) {
+                                    console.error('Gagal generate QR (qrcode package):', error);
+                                }
+                            });
+                        } else if (typeof window.QRCode === 'function') {
+                            qrContainer.innerHTML = '';
+                            new window.QRCode(qrContainer, {
+                                text: this.data,
+                                width: 256,
+                                height: 256,
+                                colorDark: "#000000",
+                                colorLight: "#ffffff",
+                                correctLevel: window.QRCode.CorrectLevel ? window.QRCode.CorrectLevel.H : undefined
+                            });
+                        } else {
+                            console.error('Tidak menemukan QRCode generator');
+                        }
+
                         console.log('QR Code generated successfully');
 
                         // Reset timer and start countdown

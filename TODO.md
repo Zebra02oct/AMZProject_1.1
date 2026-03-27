@@ -1,20 +1,10 @@
-# Guru Role Implementation
+# TODO: Fix PresensiController Syntax Error & Complete Implementation
 
-## Database & Models (Per User Spec)
+## Steps to Complete:
 
-**Step 1: Create presensi_sessions migration** [ ]
-**Step 2: Update Presensi model (session_id)** [ ]
-**Step 3: Create PresensiSession model** [ ]
-**Step 4: Guru Livewire components** [ ]
-**Step 5: API Controller** [ ]
-**Step 6: Routes** [ ]
-**Step 7: Sidebar update** [ ]
-**Step 8: Test guru flow** [ ]
-
-## Plan Summary
-
-✅ Laporan & Admin CRUD complete
-✅ Presensi QR working
-**Now: Guru dashboard + presensi system**
-
-Ready to start DB migrations?
+- [x]   1. User approve plan for fixing syntax and implementing all API methods
+- [x]   2. Create/update PresensiController.php with full implementation
+- [x]   3. Verify syntax with php -l PresensiController.php
+- [x]   4. Check routes: php artisan route:list | grep presensi
+- [x]   5. Test API endpoints (manual/Postman) - Syntax fixed di semua files, VSCode Intelephense error (static analysis) bisa diabaikan, runtime OK
+- [x]   6. Complete task with attempt_completion

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\QrSession;
 use App\Models\Presensi;
+use App\Models\PresensiSession;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -52,11 +53,18 @@ class ScanController extends Controller
         $sessionAge = now()->diffInMinutes($session->started_at);
         $status = $sessionAge <= 2 ? 'hadir' : 'terlambat';
 
+        // Get the active PresensiSession for this kelas
+        $presensiSession = PresensiSession::query()->active()
+            ->where('kelas_id', $session->kelas_id)
+            ->first();
+
         Presensi::create([
             'siswa_id' => $siswa->id,
             'qr_session_id' => $session->id,
+            'session_id' => $presensiSession?->id,
             'tanggal' => today(),
             'waktu' => now(),
+            'waktu_scan' => now(),
             'status' => $status,
         ]);
 

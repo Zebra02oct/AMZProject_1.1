@@ -13,13 +13,6 @@
             <x-app-logo class="size-8" href="#"></x-app-logo>
         </a>
 
-        <flux:navlist variant="outline">
-            <flux:navlist.group heading="Platform" class="grid">
-                <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
-                    wire:navigate>Dashboard</flux:navlist.item>
-            </flux:navlist.group>
-        </flux:navlist>
-
         @if (auth()->user()?->isAdmin())
             <nav class="space-y-1">
                 <h3 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-3 mt-6 mb-2">Admin</h3>
@@ -85,6 +78,42 @@
             </nav>
         @endif
 
+        @if (auth()->user()?->isGuru())
+            <nav class="space-y-1">
+                <h3 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-3 mt-6 mb-2">Guru</h3>
+                <a href="{{ route('guru.dashboard') }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('guru.dashboard') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    wire:navigate>
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                        </path>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="{{ route('guru.presensi') }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('guru.presensi*') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    wire:navigate>
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    Presensi
+                </a>
+                <a href="{{ route('guru.riwayat') }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('guru.riwayat') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    wire:navigate>
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25 2.25a2.25 2.25 0 002.25-2.25A2.25 2.25 0 0018 18m-8.69-5.64a2.25 2.25 0 01-2.25-2.25A2.25 2.25 0 0110.31 9h2.69a2.25 2.25 0 012.25 2.25 2.25 2.25 0 01-2.25 2.25H10.31z">
+                        </path>
+                    </svg>
+                    Riwayat
+                </a>
+            </nav>
+        @endif
+
         <flux:spacer />
 
         <!-- Desktop User Menu -->
@@ -121,7 +150,8 @@
 
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf
-                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
+                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle"
+                        class="w-full">
                         {{ __('Log Out') }}
                     </flux:menu.item>
                 </form>

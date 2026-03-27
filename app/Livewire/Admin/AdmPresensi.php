@@ -3,10 +3,11 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Kelas;
+use App\Models\Presensi;
 use App\Models\PresensiSession;
 use App\Models\QrSession;
-use App\Models\Presensi;
 use App\Models\Siswa;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -38,19 +39,19 @@ class AdmPresensi extends Component
     {
         PresensiSession::cleanupExpired();
 
-        if (PresensiSession::active()->where('kelas_id', $this->selectedKelasId)->exists()) {
-            session()->flash('error', 'Ada sesi aktif untuk kelas ini! Tutup sesi sebelumnya.');
+        if (PresensiSession::query()->active()->where('kelas_id', $this->selectedKelasId)->exists()) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Ada sesi aktif untuk kelas ini! Tutup sesi sebelumnya.']);
             return;
         }
 
         if (!$this->selectedKelasId) {
-            session()->flash('error', 'Pilih kelas terlebih dahulu!');
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Pilih kelas terlebih dahulu!']);
             return;
         }
 
         $this->activeSession = PresensiSession::create([
             'kelas_id' => $this->selectedKelasId,
-            'guru_id' => auth()->id(),
+            'guru_id' => Auth::id(),
             'session_token' => Str::random(40),
             'started_at' => now(),
             'is_active' => true,
@@ -58,7 +59,7 @@ class AdmPresensi extends Component
 
         $this->qrData = $this->activeSession->session_token;
         $this->loadData();
-        session()->flash('success', 'Sesi presensi dimulai!');
+        $this->dispatch('notify', ['type' => 'success', 'message' => 'Sesi presensi dimulai!']);
         $this->dispatch('qr-session-started', qrData: $this->qrData);
     }
 
@@ -79,7 +80,7 @@ class AdmPresensi extends Component
     {
         QrSession::where('active', true)->where('expired_at', '<', now())->update(['active' => false]);
 
-        $this->activeSession = PresensiSession::active()->first();
+        $this->activeSession = PresensiSession::query()->active()->first();
         $this->qrData = $this->activeSession?->session_token ?? '';
 
         if ($this->activeSession) {

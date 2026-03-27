@@ -39,6 +39,17 @@ class PresensiSession extends Model
         return $this->hasMany(Presensi::class, 'session_id');
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true)
+            ->where('started_at', '>=', now()->subMinutes(15));
+    }
+
+    public function scopeGuruActive($query, $guruId)
+    {
+        return $query->where('guru_id', $guruId)->active();
+    }
+
     public static function cleanupExpired()
     {
         self::where('is_active', true)
@@ -47,11 +58,5 @@ class PresensiSession extends Model
                 'is_active' => false,
                 'ended_at' => now()
             ]);
-    }
-
-    public static function active()
-    {
-        return self::where('is_active', true)
-            ->where('started_at', '>=', now()->subMinutes(15));
     }
 }

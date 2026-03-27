@@ -6,6 +6,8 @@ use App\Livewire\Admin\AdmKelas;
 use App\Livewire\Admin\AdmLaporan;
 use App\Livewire\Admin\AdmPresensi;
 use App\Livewire\Admin\AdmSiswa;
+use App\Livewire\Guru\GuruDashboard;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -13,7 +15,19 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', function () {
+    $user = Auth::user();
+
+    if ($user?->isAdmin()) {
+        return redirect()->route('admin.dashboard');
+    }
+
+    if ($user?->isGuru()) {
+        return redirect()->route('guru.dashboard');
+    }
+
+    abort(403, 'Role pengguna tidak dikenali.');
+})
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -33,6 +47,16 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/laporan', AdmLaporan::class)->name('laporan');
 
             Route::post('/scan-qr', [App\Http\Controllers\Api\PresensiController::class, 'scan'])->name('scan-qr');
+        });
+
+    Route::middleware(['check.guru'])
+        ->prefix('guru')
+        ->name('guru.')
+        ->group(function () {
+            Route::get('/dashboard', GuruDashboard::class)->name('dashboard');
+            Route::get('/presensi', \App\Livewire\Guru\GuruPresensi::class)->name('presensi');
+            Route::get('/riwayat', \App\Livewire\Guru\GuruRiwayat::class)->name('riwayat');
+            Route::get('/presensi/create/{kelas}', fn($kelas) => redirect()->route('guru.presensi'))->name('presensi.create');
         });
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
