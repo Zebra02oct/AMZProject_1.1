@@ -13,24 +13,46 @@ return new class extends Migration
     public function up(): void
     {
         // Set waktu_scan to waktu if not already set
-        DB::table('presensi')
+        // Use Laravel query builder for SQLite compatibility
+        $presensiRecords = DB::table('presensi')
             ->whereNull('waktu_scan')
-            ->update(['waktu_scan' => DB::raw('CONCAT(tanggal, " ", waktu)')]);
+            ->get();
+
+        foreach ($presensiRecords as $record) {
+            DB::table('presensi')
+                ->where('id', $record->id)
+                ->update([
+                    'waktu_scan' => $record->tanggal . ' ' . $record->waktu
+                ]);
+        }
 
         // Link presensi to presensi_sessions based on qr_session
-        DB::statement(<<<'SQL'
-            UPDATE presensi p
-            SET p.session_id = (
-                SELECT ps.id FROM presensi_sessions ps
-                WHERE ps.kelas_id IN (
-                    SELECT qs.kelas_id FROM qr_sessions qs
-                    WHERE qs.id = p.qr_session_id
-                )
-                AND ps.is_active = false
-                LIMIT 1
-            )
-            WHERE p.session_id IS NULL AND p.qr_session_id IS NOT NULL
-        SQL);
+        // Use PHP loop instead of MySQL-style UPDATE with subquery for SQLite compatibility
+        $presensiRecords = DB::table('presensi')
+            ->whereNull('session_id')
+            ->whereNotNull('qr_session_id')
+            ->get();
+
+        foreach ($presensiRecords as $presensi) {
+            // Get the kelas_id from qr_sessions
+            $kelasId = DB::table('qr_sessions')
+                ->where('id', $presensi->qr_session_id)
+                ->value('kelas_id');
+
+            if ($kelasId) {
+                // Find the presensi_session
+                $session = DB::table('presensi_sessions')
+                    ->where('kelas_id', $kelasId)
+                    ->where('is_active', false)
+                    ->first();
+
+                if ($session) {
+                    DB::table('presensi')
+                        ->where('id', $presensi->id)
+                        ->update(['session_id' => $session->id]);
+                }
+            }
+        }
     }
 
     /**
