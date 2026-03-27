@@ -12,33 +12,50 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   quality:
     runs-on: ubuntu-latest
     environment: Testing
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
+          tools: composer:v2
+          coverage: none
 
-      - name: Add Flux Credentials Loaded From ENV
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Add Flux Credentials from Secrets
         run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
 
-      - name: Install Dependencies
-        run: |
-          composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-          npm install
+      - name: Install PHP Dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress
 
-      - name: Run Pint
-        run: vendor/bin/pint
+      - name: Install Node Dependencies
+        run: npm ci
 
-      # - name: Commit Changes
+      - name: Run PHP Linting (Pint)
+        run: vendor/bin/pint --test
+
+      # Uncomment untuk auto-commit perubahan formatting
+      # - name: Auto Commit Changes
+      #   if: failure()
       #   uses: stefanzweifel/git-auto-commit-action@v5
       #   with:
-      #     commit_message: fix code style
+      #     commit_message: 'style: fix code formatting with Pint'
       #     commit_options: '--no-verify'
-      #     file_pattern: '!.github/workflows/* **/*'
+      #     file_pattern: 'app/ routes/ database/ config/ tests/'
+      #     push_options: '--force-with-lease'
