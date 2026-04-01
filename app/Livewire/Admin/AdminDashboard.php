@@ -16,8 +16,9 @@ class AdminDashboard extends Component
     public $totalKelas;
     public $hariIniHadir;
     public $terlambat;
-    public $totalPresensiHariIni;
-    public $belumPresensi;
+    public $totalPresensiHarianHariIni;
+    public $totalPresensiMapelHariIni;
+    public $belumPresensiHarian;
     public $presensiHariIni = [];
     public $chartData = [];
 
@@ -33,19 +34,32 @@ class AdminDashboard extends Component
     {
         $this->totalSiswa = Siswa::count();
         $this->totalKelas = Kelas::count();
-        $totalPresensiToday = Presensi::today()->count();
-        $this->hariIniHadir = Presensi::today()->where('status', 'hadir')->count();
-        $this->terlambat = Presensi::today()->where('status', 'terlambat')->count();
-        $this->totalPresensiHariIni = $totalPresensiToday;
-        $this->belumPresensi = $this->totalSiswa - $totalPresensiToday;
-        $this->presensiHariIni = Presensi::today()->with('siswa.kelas')->orderBy('waktu', 'desc')->get();
+        $harianToday = Presensi::today()
+            ->where('tipe_sesi', 'harian')
+            ->whereIn('status', ['hadir', 'terlambat']);
+        $this->hariIniHadir = (clone $harianToday)->where('status', 'hadir')->count();
+        $this->terlambat = (clone $harianToday)->where('status', 'terlambat')->count();
+        $this->totalPresensiHarianHariIni = (clone $harianToday)->count();
+        $this->totalPresensiMapelHariIni = Presensi::today()
+            ->where('tipe_sesi', 'mapel')
+            ->whereIn('status', ['hadir', 'terlambat'])
+            ->count();
+        $this->belumPresensiHarian = $this->totalSiswa - (clone $harianToday)->distinct('siswa_id')->count('siswa_id');
+        $this->presensiHariIni = Presensi::today()
+            ->where('tipe_sesi', 'harian')
+            ->with('siswa.kelas')
+            ->orderBy('waktu', 'desc')
+            ->get();
 
         $this->chartData = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
             $this->chartData[] = [
                 'hari' => $date->format('D'),
-                'hadir' => Presensi::whereDate('tanggal', $date)->where('status', 'hadir')->count(),
+                'hadir' => Presensi::whereDate('tanggal', $date)
+                    ->where('tipe_sesi', 'harian')
+                    ->where('status', 'hadir')
+                    ->count(),
             ];
         }
     }

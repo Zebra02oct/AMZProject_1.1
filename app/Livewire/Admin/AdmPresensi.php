@@ -40,18 +40,20 @@ class AdmPresensi extends Component
         PresensiSession::cleanupExpired();
 
         if (PresensiSession::query()->active()->where('kelas_id', $this->selectedKelasId)->exists()) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Ada sesi aktif untuk kelas ini! Tutup sesi sebelumnya.']);
+            $this->dispatch('swal-error', message: 'Ada sesi aktif untuk kelas ini! Tutup sesi sebelumnya.');
             return;
         }
 
         if (!$this->selectedKelasId) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Pilih kelas terlebih dahulu!']);
+            $this->dispatch('swal-error', message: 'Pilih kelas terlebih dahulu!');
             return;
         }
 
         $this->activeSession = PresensiSession::create([
             'kelas_id' => $this->selectedKelasId,
             'guru_id' => Auth::id(),
+            'tipe_sesi' => 'harian',
+            'mapel_id' => null,
             'session_token' => Str::random(40),
             'started_at' => now(),
             'is_active' => true,
@@ -59,7 +61,7 @@ class AdmPresensi extends Component
 
         $this->qrData = $this->activeSession->session_token;
         $this->loadData();
-        $this->dispatch('notify', ['type' => 'success', 'message' => 'Sesi presensi dimulai!']);
+        $this->dispatch('swal-success', message: 'Sesi presensi dimulai!');
         $this->dispatch('qr-session-started', qrData: $this->qrData);
     }
 
@@ -80,7 +82,7 @@ class AdmPresensi extends Component
     {
         QrSession::where('active', true)->where('expired_at', '<', now())->update(['active' => false]);
 
-        $this->activeSession = PresensiSession::query()->active()->first();
+        $this->activeSession = PresensiSession::query()->active()->with(['kelas', 'mapel'])->first();
         $this->qrData = $this->activeSession?->session_token ?? '';
 
         if ($this->activeSession) {
@@ -97,7 +99,7 @@ class AdmPresensi extends Component
             $this->belumPresensi = $totalSiswa - $scannedCount;
         }
 
-        $this->historySessions = PresensiSession::with(['kelas', 'presensis' => function ($q) {
+        $this->historySessions = PresensiSession::with(['kelas', 'mapel', 'presensis' => function ($q) {
             $q->selectRaw('status, count(*) as count')
                 ->groupBy('status');
         }])

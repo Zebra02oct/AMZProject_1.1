@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\PresensiSession;
 use App\Models\Presensi;
-use App\Models\QrSession;
 use App\Models\Siswa;
-use App\Models\Kelas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -19,8 +17,8 @@ use Carbon\Carbon;
 
 class PresensiController extends Controller
 {
-    private $school_lat = -7.25; // Koordinat Surabaya contoh
-    private $school_lng = 112.75;
+    private $school_lat = -1.273709; // Koordinat Surabaya contoh
+    private $school_lng = 1.273709;
     private $gps_radius = 0.075; // 75m dalam km
 
     /**
@@ -45,7 +43,9 @@ class PresensiController extends Controller
     public function start(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'kelas_id' => 'required|exists:kelas,id'
+            'kelas_id' => 'required|exists:kelas,id',
+            'lat' => 'nullable|numeric|between:-90,90',
+            'lng' => 'nullable|numeric|between:-180,180',
         ]);
 
         if ($validator->fails()) {
@@ -53,7 +53,7 @@ class PresensiController extends Controller
         }
 
         $user = Auth::user();
-        if ($user->role !== 'guru') {
+        if (!$user || !$user->isGuru()) {
             return response()->json(['error' => 'Hanya guru yang boleh mulai sesi'], 403);
         }
 
@@ -72,6 +72,8 @@ class PresensiController extends Controller
                 'kelas_id' => $request->kelas_id,
                 'guru_id' => $user->id,
                 'session_token' => Str::random(32),
+                'latitude' => $request->lat,
+                'longitude' => $request->lng,
                 'is_active' => true,
                 'started_at' => now()
             ]);
@@ -195,8 +197,8 @@ class PresensiController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'qr_data' => 'required|string',
-            'lat' => 'required|numeric',
-            'lng' => 'required|numeric',
+            'lat' => 'required|numeric|between:-90,90',
+            'lng' => 'required|numeric|between:-180,180',
             'nis' => 'nullable|string'
         ]);
 
@@ -204,72 +206,98 @@ class PresensiController extends Controller
             return response()->json(['error' => $validator->errors()], 422);
         }
 
-        // Validasi lokasi sekolah
-        $distance = $this->haversine($request->lat, $request->lng, $this->school_lat, $this->school_lng);
-        if ($distance > $this->gps_radius) {
-            return response()->json(['error' => 'Lokasi tidak diizinkan (terlalu jauh dari sekolah)'], 403);
-        }
-
         try {
-            $qrData = json_decode($request->qr_data, true);
-            if (!$qrData || !isset($qrData['session_id'], $qrData['token'])) {
-                return response()->json(['error' => 'QR code tidak valid'], 400);
-            }
-
-            $session = PresensiSession::where('id', $qrData['session_id'])
-                ->where('session_token', $qrData['token'])
+            // 1. Langsung cari sesi berdasarkan raw string token dari QR
+            $session = PresensiSession::where('session_token', $request->qr_data)
                 ->where('is_active', true)
                 ->first();
 
             if (!$session) {
-                return response()->json(['error' => 'Sesi tidak aktif atau QR expired'], 410);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sesi presensi tidak aktif atau QR code sudah expired'
+                ], 410);
+            }
+
+            // 2. VALIDASI LOKASI DINAMIS (Berdasarkan lokasi laptop guru saat buka sesi)
+            // Cek apakah guru mengizinkan lokasi saat buka sesi
+            if ($session->latitude && $session->longitude) {
+                $distance = $this->haversine($request->lat, $request->lng, $session->latitude, $session->longitude);
+
+                // Radius 50 meter (0.05 km)
+                if ($distance > 0.05) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Gagal presensi: Kamu berada di luar jangkauan area guru (' . round($distance * 1000) . ' meter).'
+                    ], 403);
+                }
             }
 
             $user = Auth::user();
-            if ($user->role !== 'siswa') {
-                return response()->json(['error' => 'Hanya siswa yang boleh presensi'], 403);
+            if (!$user || !$user->isSiswa()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya siswa yang diperbolehkan melakukan presensi'
+                ], 403);
             }
 
-            // Cari siswa by user_id atau NIS
+            // 2. Cari siswa berdasarkan user_id dan pastikan dia di kelas yang benar
             $siswa = Siswa::where('user_id', $user->id)
-                ->orWhere('nis', $request->nis ?? '')
                 ->where('kelas_id', $session->kelas_id)
                 ->first();
 
             if (!$siswa) {
-                return response()->json(['error' => 'Siswa tidak ditemukan di kelas ini'], 404);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kamu tidak terdaftar di kelas untuk sesi presensi ini'
+                ], 404);
             }
 
-            // Cek sudah presensi belum hari ini di sesi ini
+            // 3. Cek apakah sudah presensi di sesi ini
             $exists = Presensi::where('siswa_id', $siswa->id)
                 ->where('session_id', $session->id)
                 ->first();
 
             if ($exists) {
-                return response()->json(['error' => 'Sudah presensi di sesi ini'], 409);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kamu sudah melakukan presensi di sesi ini'
+                ], 409);
             }
+
+            // 4. Penentuan Status Hadir / Terlambat (Batas 5 menit / 300 detik)
+            $waktuScan = now();
+            $scanSeconds = $waktuScan->diffInSeconds($session->started_at);
+            $status = $scanSeconds <= 300 ? 'hadir' : 'terlambat';
 
             DB::beginTransaction();
             $presensi = Presensi::create([
                 'siswa_id' => $siswa->id,
                 'session_id' => $session->id,
-                'qr_session_id' => $session->id, // atau generate separate jika perlu
-                'tanggal' => now(),
-                'waktu_scan' => now(),
-                'waktu' => now()->format('H:i'),
-                'status' => 'hadir'
+                'qr_session_id' => null,
+                'tipe_sesi' => $session->tipe_sesi ?? 'harian',
+                'mapel_id' => $session->mapel_id,
+                'tanggal' => $waktuScan->toDateString(),
+                'waktu_scan' => $waktuScan,
+                'waktu' => $waktuScan->format('H:i'),
+                'status' => $status
             ]);
             DB::commit();
 
+            // 5. Response Sukses
             return response()->json([
                 'success' => true,
-                'message' => 'Presensi berhasil',
+                'message' => 'Presensi berhasil dicatat sebagai: ' . ucfirst($status),
                 'data' => $presensi->load('siswa', 'session.kelas')
-            ]);
+            ], 200);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Scan presensi error: ' . $e->getMessage());
-            return response()->json(['error' => 'Gagal presensi'], 500);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal melakukan presensi sistem: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -334,7 +362,7 @@ class PresensiController extends Controller
     public function laporan(Request $request)
     {
         $user = Auth::user();
-        if ($user->role !== 'admin') {
+        if (!$user || !$user->isAdmin()) {
             return response()->json(['error' => 'Hanya admin'], 403);
         }
 

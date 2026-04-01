@@ -1,19 +1,54 @@
 <div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         document.addEventListener('livewire:init', () => {
-            Livewire.hook('morph.updated', () => {
-                generateQr();
+            if (window.__guruPresensiHarianHooksRegistered) {
+                return;
+            }
+            window.__guruPresensiHarianHooksRegistered = true;
+
+            const triggerRender = () => {
+                generateQr(0);
                 updateTimers();
+            };
+
+            Livewire.hook('morph.updated', triggerRender);
+            Livewire.hook('message.processed', triggerRender);
+            window.addEventListener('render-qr-harian', triggerRender);
+            window.addEventListener('swal-success', (event) => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: event.detail?.message ?? '',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
             });
-            Livewire.hook('message.processed', () => {
-                generateQr();
-                updateTimers();
+            window.addEventListener('swal-error', (event) => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: event.detail?.message ?? '',
+                    timer: 5000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
             });
         });
 
-        function generateQr() {
+        function generateQr(attempt = 0) {
+            const maxRetry = 8;
+            const retryDelayMs = 180;
+
             const qrEl = document.getElementById('qrcode');
             if (!qrEl || !qrEl.dataset.qr) {
+                if (attempt < maxRetry) {
+                    setTimeout(() => generateQr(attempt + 1), retryDelayMs);
+                }
                 return;
             }
 
@@ -46,9 +81,46 @@
                 return;
             }
 
+            if (attempt < maxRetry) {
+                setTimeout(() => generateQr(attempt + 1), retryDelayMs);
+                return;
+            }
+
             console.error(
                 'QRCode library tidak ditemukan. Pastikan package qrcode sudah di-import di app.js atau qrcodejs tersedia.'
+            );
+        }
+
+        function getLocationAndStart(componentId) {
+            const component = window.Livewire?.find(componentId);
+            if (!component) {
+                console.error('Komponen Livewire tidak ditemukan untuk memulai sesi presensi.');
+                return;
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        component.set('latitude', position.coords.latitude);
+                        component.set('longitude', position.coords.longitude);
+                        component.call('startSession');
+                    },
+                    () => {
+                        alert('Gagal mendapatkan lokasi. Pastikan izin lokasi/GPS diizinkan di browser laptopmu.');
+                        component.set('latitude', null);
+                        component.set('longitude', null);
+                        component.call('startSession');
+                    }, {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                    }
                 );
+            } else {
+                alert('Browser kamu tidak mendukung deteksi lokasi.');
+                component.set('latitude', null);
+                component.set('longitude', null);
+                component.call('startSession');
+            }
         }
 
         let timers = {};
@@ -76,39 +148,23 @@
     </style>
 
     <div class="p-8 max-w-7xl mx-auto space-y-6">
-        @if (session('success'))
-            <div class="p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl">✓ {{ session('success') }}
-            </div>
-        @endif
-        @if (session('error'))
-            <div class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl">✗ {{ session('error') }}</div>
-        @endif
-
         @if (!$isSessionActive)
             <div class="text-center py-20">
                 <div class="text-6xl mb-6">📋</div>
                 <h1 class="text-4xl font-bold text-gray-900 mb-4 dark:text-white">Presensi</h1>
-                <p class="text-xl text-gray-600 mb-12 dark:text-gray-300">Mulai sesi presensi kelas</p>
-                <div class="max-w-md mx-auto space-y-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2 dark:text-gray-300">Pilih
-                            Kelas</label>
-                        <select wire:model="selectedKelasId"
-                            class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all">
-                            <option value="">Pilih kelas...</option>
-                            @foreach ($kelasList as $id => $name)
-                                <option value="{{ $id }}">{{ $name }}</option>
-                            @endforeach
-                        </select>
-                        @error('selectedKelasId')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                @if ($guruKelas)
+                    <p class="text-xl text-gray-600 mb-2 dark:text-gray-300">{{ $guruKelas->name }}</p>
+                    <p class="text-lg text-gray-500 mb-12 dark:text-gray-400">Mulai sesi presensi</p>
+                    <div class="max-w-md mx-auto space-y-6">
+                        <button onclick="getLocationAndStart('{{ $this->getId() }}')"
+                            class="w-full py-4 bg-gradient-to-r from-[#8f4f11] to-[#b97820] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+                            Mulai Presensi →
+                        </button>
                     </div>
-                    <button wire:click="startSession" {{ !$selectedKelasId ? 'disabled' : '' }}
-                        class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all disabled:opacity-50">
-                        Mulai Presensi →
-                    </button>
-                </div>
+                @else
+                    <p class="text-xl text-red-600 mb-12 dark:text-red-400">Anda tidak memiliki kelas yang ditugaskan
+                        sebagai wali kelas</p>
+                @endif
             </div>
         @else
             <div class="space-y-8">
@@ -140,36 +196,36 @@
                     class="bg-white p-12 rounded-2xl shadow-lg text-center border dark:bg-gray-800 dark:border-gray-700">
                     <div id="qrcode" data-qr="{{ $qrData }}" class="mx-auto mb-6 max-w-xs"></div>
                     <h2 class="text-2xl font-bold text-gray-900 mb-2 dark:text-white">Scan untuk presensi</h2>
-                    <p class="text-lg text-gray-600 dark:text-gray-300">QR aktif <span
+                    <p class="text-lg text-[#8b6a3c] dark:text-[#e5c58d]">QR aktif <span
                             id="qr-timer">{{ gmdate('i:s', $qrCountdown) }}</span></p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div
-                        class="p-8 rounded-2xl shadow-lg border text-center bg-white dark:bg-gray-800 dark:border-gray-700">
+                        class="p-8 rounded-2xl shadow-lg border text-center bg-white/95 dark:bg-[#3a2a13] dark:border-gray-700">
                         <div class="text-4xl mb-2">🟢</div>
-                        <h3 class="font-semibold mb-2 text-gray-900 dark:text-white">Hadir</h3>
+                        <h3 class="font-semibold mb-2 text-[#7a4f16] dark:text-[#ffd889]">Hadir</h3>
                         <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ $hadirCount }}</div>
                     </div>
                     <div
-                        class="p-8 rounded-2xl shadow-lg border text-center bg-white dark:bg-gray-800 dark:border-gray-700">
+                        class="p-8 rounded-2xl shadow-lg border text-center bg-white/95 dark:bg-[#3a2a13] dark:border-gray-700">
                         <div class="text-4xl mb-2">🟡</div>
-                        <h3 class="font-semibold mb-2 text-gray-900 dark:text-white">Terlambat</h3>
+                        <h3 class="font-semibold mb-2 text-[#7a4f16] dark:text-[#ffd889]">Terlambat</h3>
                         <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ $terlambatCount }}
                         </div>
                     </div>
                     <div
-                        class="p-8 rounded-2xl shadow-lg border text-center bg-white dark:bg-gray-800 dark:border-gray-700">
+                        class="p-8 rounded-2xl shadow-lg border text-center bg-white/95 dark:bg-[#3a2a13] dark:border-gray-700">
                         <div class="text-4xl mb-2">🔴</div>
-                        <h3 class="font-semibold mb-2 text-gray-900 dark:text-white">Belum Hadir</h3>
+                        <h3 class="font-semibold mb-2 text-[#7a4f16] dark:text-[#ffd889]">Belum Hadir</h3>
                         <div class="text-3xl font-bold text-red-600 dark:text-red-400">{{ $belumHadirCount }}</div>
                     </div>
                 </div>
 
                 <div
                     class="bg-white rounded-2xl shadow-lg border overflow-hidden dark:bg-gray-800 dark:border-gray-700">
-                    <div class="p-6 border-b bg-gray-50 dark:bg-gray-700/50 dark:border-gray-600">
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Siswa Hadir
+                    <div class="p-6 border-b bg-[#f8e9c8] dark:bg-[#4a3618] dark:border-gray-600">
+                        <h3 class="text-xl font-semibold text-[#7a4f16] dark:text-[#ffd889]">Siswa Hadir
                             ({{ count($currentPresensi) }})</h3>
                     </div>
                     <div class="overflow-x-auto">
@@ -191,9 +247,9 @@
                                 @forelse($currentPresensi as $p)
                                     @php $s = $p->waktu_scan?->diffInSeconds($activeSession->started_at) ?? 999; @endphp
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                        <td class="px-6 py-4 font-medium text-[#7a4f16] dark:text-[#ffd889]">
                                             {{ $p->siswa->name }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="px-6 py-4 text-sm text-[#8b6a3c] dark:text-[#e5c58d]">
                                             {{ $p->waktu_scan?->format('H:i') ?? '-' }}</td>
                                         <td class="px-6 py-4">
                                             <span
@@ -205,7 +261,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="3"
-                                            class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">Belum ada
+                                            class="px-6 py-12 text-center text-[#8b6a3c] dark:text-[#e5c58d]">Belum ada
                                             presensi</td>
                                     </tr>
                                 @endforelse

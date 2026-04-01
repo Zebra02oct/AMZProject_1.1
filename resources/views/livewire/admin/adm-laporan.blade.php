@@ -2,16 +2,16 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <h1 class="text-3xl font-bold tracking-tight text-[#7a4f16] dark:text-[#ffd889]">
                 Laporan Presensi
             </h1>
-            <p class="mt-2 text-lg text-gray-600 dark:text-gray-300">
+            <p class="mt-2 text-lg text-[#8b6a3c] dark:text-[#e5c58d]">
                 Rekap dan statistik kehadiran siswa
             </p>
         </div>
         <div class="mt-4 sm:mt-0">
             <button wire:click="clearFilters"
-                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-[#7a4f16] bg-[#fff3dc] hover:bg-[#f8e9c8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#b97820] dark:bg-[#4a3618] dark:text-[#ffd889] dark:hover:bg-[#5a401a]">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14" />
                 </svg>
@@ -21,23 +21,23 @@
     </div>
 
     {{-- Filters --}}
-    <div class="bg-white dark:bg-gray-800 shadow-xl ring-1 ring-gray-900/5 rounded-2xl p-8">
-        <h2 class="text-xl font-semibold mb-6 text-gray-900 dark:text-white">Filter Data</h2>
+    <div class="bg-white/95 dark:bg-[#3a2a13] shadow-xl ring-1 ring-gray-900/5 rounded-2xl p-8">
+        <h2 class="text-xl font-semibold mb-6 text-[#7a4f16] dark:text-[#ffd889]">Filter Data</h2>
         <form wire:submit="applyFilters" class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tanggal Dari</label>
                 <input type="date" wire:model="dateFrom"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#b97820] focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tanggal Sampai</label>
                 <input type="date" wire:model="dateTo"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#b97820] focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kelas</label>
                 <select wire:model="kelasId"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#b97820] focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     <option value="">Semua Kelas</option>
                     @foreach ($kelasList as $kelas)
                         <option value="{{ $kelas->id }}">{{ $kelas->name }}</option>
@@ -46,7 +46,7 @@
             </div>
             <div class="flex items-end space-x-3">
                 <button type="submit"
-                    class="w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg shadow-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors">
+                    class="w-full bg-[#d89932] hover:bg-[#c98b27] text-[#4f3110] px-6 py-2 rounded-lg shadow-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#b97820] focus:ring-offset-2 transition-colors">
                     Tampilkan Data
                 </button>
             </div>
@@ -57,7 +57,7 @@
     @if ($filtersApplied)
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div
-                class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                class="bg-white/95 dark:bg-[#3a2a13] p-6 rounded-2xl shadow-lg border border-[#ecd6aa] dark:border-[#8d662b]">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-gray-100 dark:bg-gray-700">
                         <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,13 +67,14 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Siswa</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalSiswa) }}</p>
+                        <p class="text-2xl font-bold text-[#7a4f16] dark:text-[#ffd889]">
+                            {{ number_format($totalSiswa) }}</p>
                     </div>
                 </div>
             </div>
 
             <div
-                class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                class="bg-white/95 dark:bg-[#3a2a13] p-6 rounded-2xl shadow-lg border border-[#ecd6aa] dark:border-[#8d662b]">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/30">
                         <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor"
@@ -90,7 +91,7 @@
             </div>
 
             <div
-                class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                class="bg-white/95 dark:bg-[#3a2a13] p-6 rounded-2xl shadow-lg border border-[#ecd6aa] dark:border-[#8d662b]">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
                         <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor"
@@ -108,7 +109,7 @@
             </div>
 
             <div
-                class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+                class="bg-white/95 dark:bg-[#3a2a13] p-6 rounded-2xl shadow-lg border border-[#ecd6aa] dark:border-[#8d662b]">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-red-100 dark:bg-red-900/30">
                         <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor"
@@ -128,13 +129,13 @@
     @endif
 
     {{-- Table --}}
-    <div class="bg-white dark:bg-gray-800 shadow-xl ring-1 ring-gray-900/5 rounded-2xl p-8">
+    <div class="bg-white/95 dark:bg-[#3a2a13] shadow-xl ring-1 ring-gray-900/5 rounded-2xl p-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Data Presensi</h2>
+            <h2 class="text-xl font-semibold text-[#7a4f16] dark:text-[#ffd889]">Data Presensi</h2>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-700/50">
+                <thead class="bg-[#f8e9c8] dark:bg-[#4a3618]">
                     <tr>
                         <th
                             class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -155,33 +156,40 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                     @forelse ($presensi as $item)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                        <tr class="hover:bg-[#fff3dc] dark:hover:bg-[#4a3618]">
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#7a4f16] dark:text-[#ffd889]">
                                 {{ $item->siswa->name ?? 'N/A' }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#7a4f16] dark:text-[#ffd889]">
                                 {{ $item->siswa->kelas->name ?? 'N/A' }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#7a4f16] dark:text-[#ffd889]">
                                 {{ $item->tanggal?->format('d-m-Y') }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#7a4f16] dark:text-[#ffd889]">
                                 {{ $item->waktu?->format('H:i') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @php $status = strtolower($item->status ?? ''); @endphp
+                                @php
+                                    $status = strtolower($item->status ?? '');
+                                    $statusClass = match ($status) {
+                                        'hadir'
+                                            => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300',
+                                        'terlambat'
+                                            => 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
+                                        default => 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300',
+                                    };
+                                @endphp
                                 <span
-                                    class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                    @if ($status === 'hadir') bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300
-                                    @elseif($status === 'terlambat') bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300
-                                    @else bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300 @endif">
+                                    class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">
                                     {{ ucfirst(str_replace(['hadir', 'terlambat'], ['Hadir', 'Terlambat'], $status)) ?: 'Tidak Hadir' }}
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="5" class="px-6 py-12 text-center text-[#8b6a3c] dark:text-[#e5c58d]">
                                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
                                     stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

@@ -1,4 +1,6 @@
 <div class="space-y-8" x-data="presensiComponent()" wire:poll.3s="loadData">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     {{-- Load QRCode Library --}}
     <script>
         (function() {
@@ -39,13 +41,13 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {{-- Kelas Selection & Controls --}}
         <div
-            class="lg:col-span-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Mulai Sesi Presensi</h3>
+            class="lg:col-span-1 bg-white/95 dark:bg-[#3a2a13] rounded-xl shadow-sm border border-[#ecd6aa] dark:border-[#8d662b] p-6">
+            <h3 class="text-lg font-semibold text-[#7a4f16] dark:text-[#ffd889] mb-4">Mulai Sesi Presensi</h3>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pilih Kelas</label>
                     <select wire:model.live="selectedKelasId"
-                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all"
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#b97820] focus:border-[#b97820] dark:bg-gray-700 dark:text-white transition-all"
                         @change="generateQrIfSelected()">
                         <option value="">Pilih Kelas</option>
                         @foreach ($kelasList as $id => $name)
@@ -58,6 +60,18 @@
                     <div
                         class="text-center p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                         <div class="text-sm font-medium text-green-800 dark:text-green-200 mb-1">✅ Sesi Aktif</div>
+                        <div class="flex items-center justify-center gap-2 flex-wrap mb-2">
+                            <span
+                                class="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f7e5c0] text-[#8f4f11] dark:bg-[#5a401a] dark:text-[#f0c66f]">
+                                {{ ucfirst($activeSession->tipe_sesi ?? 'harian') }}
+                            </span>
+                            @if (($activeSession->tipe_sesi ?? 'harian') === 'mapel' && $activeSession->mapel)
+                                <span
+                                    class="px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200">
+                                    {{ $activeSession->mapel->nama_mapel }}
+                                </span>
+                            @endif
+                        </div>
                         <div class="text-xs text-green-700 dark:text-green-300">Berakhir:
                             {{ $activeSession->expired_at?->diffForHumans() ?? '-' }}</div>
                     </div>
@@ -67,7 +81,7 @@
                     </button>
                 @else
                     <button wire:click="startSession"
-                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-3 rounded-lg font-semibold shadow-xl transition-all duration-200 flex items-center justify-center gap-2 text-lg"
+                        class="w-full bg-gradient-to-r from-[#8f4f11] to-[#b97820] hover:from-[#7b430e] hover:to-[#a3691b] text-white px-4 py-3 rounded-lg font-semibold shadow-xl transition-all duration-200 flex items-center justify-center gap-2 text-lg"
                         :disabled="!$wire.selectedKelasId">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
@@ -81,8 +95,8 @@
 
         {{-- QR Code Display --}}
         <div
-            class="lg:col-span-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">QR Code Presensi</h3>
+            class="lg:col-span-1 bg-white/95 dark:bg-[#3a2a13] rounded-xl shadow-sm border border-[#ecd6aa] dark:border-[#8d662b] p-6 text-center">
+            <h3 class="text-lg font-semibold text-[#7a4f16] dark:text-[#ffd889] mb-6">QR Code Presensi Kelas</h3>
             @if ($qrData)
                 <div x-data="qrGenerator('{{ $qrData }}')" class="space-y-4">
                     <div id="qrcode"
@@ -94,7 +108,7 @@
                             class="font-mono bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded text-sm text-gray-800 dark:text-gray-200">
                             {{ Str::substr($qrData, 0, 8) }}...
                         </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Scan QR ini untuk presensi</div>
+                        <div class="text-xs text-[#8b6a3c] dark:text-[#e5c58d] mt-1">Scan QR ini untuk presensi</div>
                     </div>
                     <div class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 rounded-lg p-3">
                         <div class="text-sm font-semibold text-yellow-800 dark:text-yellow-200 mb-1">⏱️ Timer</div>
@@ -105,7 +119,7 @@
                     </div>
                 </div>
             @else
-                <div class="h-64 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
+                <div class="h-64 flex flex-col items-center justify-center text-[#8b6a3c] dark:text-[#e5c58d]">
                     <svg class="w-20 h-20 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
@@ -118,28 +132,29 @@
 
         {{-- Stats Cards --}}
         <div class="lg:col-span-1 grid grid-cols-1 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Statistik Sesi Aktif</h4>
+            <div
+                class="bg-white/95 dark:bg-[#3a2a13] rounded-xl shadow-sm border border-[#ecd6aa] dark:border-[#8d662b] p-6">
+                <h4 class="font-semibold text-[#7a4f16] dark:text-[#ffd889] mb-3">Statistik Sesi Aktif</h4>
                 @if ($activeSession)
                     <div class="grid grid-cols-3 gap-4 text-center">
                         <div>
-                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                            <div class="text-2xl font-bold text-[#8f4f11] dark:text-[#f0c66f]">
                                 {{ $currentPresensi->where('status', 'hadir')->count() }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Hadir Tepat Waktu</div>
+                            <div class="text-xs text-[#8b6a3c] dark:text-[#e5c58d]">Hadir Tepat Waktu</div>
                         </div>
                         <div>
                             <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                                 {{ $currentPresensi->where('status', 'terlambat')->count() }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Terlambat</div>
+                            <div class="text-xs text-[#8b6a3c] dark:text-[#e5c58d]">Terlambat</div>
                         </div>
                         <div>
                             <div class="text-2xl font-bold text-gray-600 dark:text-gray-400">
                                 {{ $currentPresensi->count() }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Total Scan</div>
+                            <div class="text-xs text-[#8b6a3c] dark:text-[#e5c58d]">Total Scan</div>
                         </div>
                     </div>
                 @else
-                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <div class="text-center py-8 text-[#8b6a3c] dark:text-[#e5c58d]">
                         Tidak ada sesi aktif
                     </div>
                 @endif
@@ -150,14 +165,15 @@
     {{-- Current Presensi Table --}}
     @if ($activeSession && $currentPresensi->isNotEmpty())
         <div
-            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            class="bg-white/95 dark:bg-[#3a2a13] rounded-xl shadow-sm border border-[#ecd6aa] dark:border-[#8d662b] overflow-hidden">
             <div class="p-6 border-b border-gray-200 dark:border-gray-600">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Monitoring Presensi Real-time (Kelas
+                <h3 class="text-xl font-semibold text-[#7a4f16] dark:text-[#ffd889]">Monitoring Presensi Real-time
+                    (Kelas
                     {{ $activeSession->kelas->name ?? '' }})</h3>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-gray-50 dark:bg-gray-700/50">
+                    <thead class="bg-[#f8e9c8] dark:bg-[#4a3618]">
                         <tr>
                             <th
                                 class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -178,22 +194,22 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @foreach ($currentPresensi as $index => $p)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <tr class="hover:bg-[#fff3dc] dark:hover:bg-[#4a3618] transition-colors">
                                 <td
-                                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#7a4f16] dark:text-[#ffd889]">
                                     {{ $index + 1 }}
                                 </td>
                                 <td
-                                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#7a4f16] dark:text-[#ffd889]">
                                     {{ $p->siswa->name }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span
-                                        class="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 text-xs font-medium rounded-full">
+                                        class="px-2 py-1 bg-[#f7e5c0] text-[#8f4f11] dark:bg-[#5a401a] dark:text-[#f0c66f] text-xs font-medium rounded-full">
                                         {{ $p->siswa->kelas->name }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[#7a4f16] dark:text-[#ffd889]">
                                     {{ $p->waktu->format('H:i:s') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -219,13 +235,13 @@
 
     {{-- History Sessions --}}
     <div
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        class="bg-white/95 dark:bg-[#3a2a13] rounded-xl shadow-sm border border-[#ecd6aa] dark:border-[#8d662b] overflow-hidden">
         <div class="p-6 border-b border-gray-200 dark:border-gray-600">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Riwayat Sesi Presensi</h3>
+            <h3 class="text-xl font-semibold text-[#7a4f16] dark:text-[#ffd889]">Riwayat Sesi Presensi</h3>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gray-50 dark:bg-gray-700/50">
+                <thead class="bg-[#f8e9c8] dark:bg-[#4a3618]">
                     <tr>
                         <th
                             class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -233,6 +249,9 @@
                         <th
                             class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Kelas</th>
+                        <th
+                            class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Tipe</th>
                         <th
                             class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Hadir</th>
@@ -246,14 +265,25 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($historySessions as $session)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        <tr class="hover:bg-[#fff3dc] dark:hover:bg-[#4a3618] transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#7a4f16] dark:text-[#ffd889]">
                                 {{ $session->started_at->format('d/m/Y H:i') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span
-                                    class="px-2 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200 text-xs font-medium rounded-full">
+                                    class="px-2 py-1 bg-[#f7e5c0] text-[#8f4f11] dark:bg-[#5a401a] dark:text-[#f0c66f] text-xs font-medium rounded-full">
                                     {{ $session->kelas->name }}
+                                </span>
+                                @if (($session->tipe_sesi ?? 'harian') === 'mapel' && $session->mapel)
+                                    <div class="mt-2 text-xs text-[#8b6a3c] dark:text-[#e5c58d]">
+                                        {{ $session->mapel->nama_mapel }}
+                                    </div>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span
+                                    class="px-2.5 py-1 rounded-full text-xs font-semibold {{ ($session->tipe_sesi ?? 'harian') === 'mapel' ? 'bg-[#e7f3d1] text-[#5f7a18] dark:bg-[#5f7a18] dark:text-[#e7f3d1]' : 'bg-[#f8e9c8] text-[#8f4f11] dark:bg-[#5a401a] dark:text-[#f0c66f]' }}">
+                                    {{ ucfirst($session->tipe_sesi ?? 'harian') }}
                                 </span>
                             </td>
                             <td
@@ -266,14 +296,14 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                                 <button
-                                    class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium">
+                                    class="text-[#8f4f11] dark:text-[#f0c66f] hover:text-blue-900 dark:hover:text-blue-300 font-medium">
                                     Detail →
                                 </button>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="6" class="px-6 py-12 text-center text-[#8b6a3c] dark:text-[#e5c58d]">
                                 Belum ada riwayat presensi
                             </td>
                         </tr>
@@ -297,7 +327,8 @@
                             text: data.message,
                             toast: true,
                             position: 'top-end',
-                            timer: 3000
+                            timer: 3000,
+                            showConfirmButton: false
                         });
                     });
                     this.$wire.on('swal-error', (data) => {
@@ -307,7 +338,8 @@
                             text: data.message,
                             toast: true,
                             position: 'top-end',
-                            timer: 5000
+                            timer: 5000,
+                            showConfirmButton: false
                         });
                     });
                 },

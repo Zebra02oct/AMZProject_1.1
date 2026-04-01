@@ -16,6 +16,10 @@ class PresensiSession extends Model
         'started_at',
         'ended_at',
         'is_active',
+        'latitude',
+        'longitude',
+        'tipe_sesi',
+        'mapel_id',
     ];
 
     protected $casts = [
@@ -37,6 +41,11 @@ class PresensiSession extends Model
     public function presensis()
     {
         return $this->hasMany(Presensi::class, 'session_id');
+    }
+
+    public function mapel()
+    {
+        return $this->belongsTo(Mapel::class);
     }
 
     public function scopeActive($query)

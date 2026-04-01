@@ -2,6 +2,9 @@
 
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Middleware\CheckGuru;
+use App\Http\Middleware\ForceJsonResponse;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,7 +21,25 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.admin' => CheckAdmin::class,
             'check.guru' => CheckGuru::class,
         ]);
+        $middleware->statefulApi()->api(prepend: [
+            ForceJsonResponse::class,
+        ]);
+        $middleware->api(prepend: [
+            ForceJsonResponse::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->shouldRenderJsonWhen(function (Request $request) {
+            return $request->is('api/*') || $request->expectsJson();
+        });
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Unauthenticated',
+                ], 401);
+            }
+
+            return null;
+        });
     })->create();

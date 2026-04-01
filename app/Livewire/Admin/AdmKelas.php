@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Kelas;
+use App\Models\User;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -15,6 +17,13 @@ class AdmKelas extends Component
     public $showDeleteConfirm = false;
     public $editingId = null;
     public $name = '';
+    public $wali_kelas_id = '';
+    public $guruList = [];
+
+    public function mount()
+    {
+        $this->guruList = User::where('role', 'Guru')->orderBy('name')->pluck('name', 'id')->toArray();
+    }
 
     public function updatedSearch()
     {
@@ -26,9 +35,10 @@ class AdmKelas extends Component
         $this->resetForm();
         $this->showForm = !$this->showForm;
         if ($id) {
-            $kelas = Kelas::find($id);
+            $kelas = Kelas::findOrFail($id);
             $this->editingId = $id;
             $this->name = $kelas->name;
+            $this->wali_kelas_id = (string) ($kelas->wali_kelas_id ?? '');
         }
     }
 
@@ -36,13 +46,23 @@ class AdmKelas extends Component
     {
         $this->validate([
             'name' => 'required|string|max:255|unique:kelas,name,' . ($this->editingId ?? 'NULL'),
+            'wali_kelas_id' => [
+                'nullable',
+                Rule::exists('users', 'id')->where(fn($query) => $query->where('role', 'Guru')),
+                Rule::unique('kelas', 'wali_kelas_id')->ignore($this->editingId),
+            ],
         ]);
 
+        $payload = [
+            'name' => $this->name,
+            'wali_kelas_id' => filled($this->wali_kelas_id) ? $this->wali_kelas_id : null,
+        ];
+
         if ($this->editingId) {
-            $kelas = Kelas::find($this->editingId);
-            $kelas->update(['name' => $this->name]);
+            $kelas = Kelas::findOrFail($this->editingId);
+            $kelas->update($payload);
         } else {
-            Kelas::create(['name' => $this->name]);
+            Kelas::create($payload);
         }
 
         $this->resetForm();
@@ -63,7 +83,7 @@ class AdmKelas extends Component
 
     public function delete()
     {
-        Kelas::find($this->editingId)->delete();
+        Kelas::findOrFail($this->editingId)->delete();
         $this->resetForm();
         $this->showDeleteConfirm = false;
         $this->dispatch('swal-success', ['message' => 'Kelas berhasil dihapus!']);
@@ -73,13 +93,15 @@ class AdmKelas extends Component
     {
         $this->editingId = null;
         $this->name = '';
+        $this->wali_kelas_id = '';
         $this->resetValidation();
         $this->resetPage();
     }
 
     public function getKelasProperty()
     {
-        return Kelas::withCount('siswa')
+        return Kelas::with(['waliKelas:id,name'])
+            ->withCount('siswa')
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', "%{$this->search}%");
             })

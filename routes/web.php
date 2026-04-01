@@ -4,6 +4,7 @@ use App\Livewire\Admin\AdmGuru;
 use App\Livewire\Admin\AdminDashboard;
 use App\Livewire\Admin\AdmKelas;
 use App\Livewire\Admin\AdmLaporan;
+use App\Livewire\Admin\AdmMapel;
 use App\Livewire\Admin\AdmPresensi;
 use App\Livewire\Admin\AdmSiswa;
 use App\Livewire\Guru\GuruDashboard;
@@ -43,10 +44,11 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/siswa', AdmSiswa::class)->name('siswa');
             Route::get('/guru', AdmGuru::class)->name('guru');
             Route::get('/kelas', AdmKelas::class)->name('kelas');
+            Route::get('/mapel', AdmMapel::class)->name('mapel');
             Route::get('/presensi', AdmPresensi::class)->name('presensi');
             Route::get('/laporan', AdmLaporan::class)->name('laporan');
 
-            Route::post('/scan-qr', [App\Http\Controllers\Api\PresensiController::class, 'scan'])->name('scan-qr');
+            // Route::post('/scan-qr', [App\Http\Controllers\Api\PresensiController::class, 'scan'])->name('scan-qr');
         });
 
     Route::middleware(['check.guru'])
@@ -55,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
         ->group(function () {
             Route::get('/dashboard', GuruDashboard::class)->name('dashboard');
             Route::get('/presensi', \App\Livewire\Guru\GuruPresensi::class)->name('presensi');
+            Route::get('/presensi-mapel', \App\Livewire\Guru\GuruPresensiMapel::class)->name('presensi-mapel');
             Route::get('/riwayat', \App\Livewire\Guru\GuruRiwayat::class)->name('riwayat');
             Route::get('/presensi/create/{kelas}', fn($kelas) => redirect()->route('guru.presensi'))->name('presensi.create');
         });

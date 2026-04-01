@@ -11,7 +11,14 @@ class Siswa extends Model
 
     use HasFactory;
 
-    protected $fillable = ['name', 'nis', 'kelas_id'];
+    protected $fillable = [
+        'name',
+        'nis',
+        'kelas_id',
+        'user_id',
+        'phone',
+        'address',
+    ];
 
     public function scopeSearch($query, $search)
     {
@@ -26,13 +33,20 @@ class Siswa extends Model
         return $kelasId ? $query->where('kelas_id', $kelasId) : $query;
     }
 
-    public function kelas()
+    public function user()
     {
-        return $this->belongsTo(Kelas::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
+    // Relasi ke Kelas
+    public function kelas()
+    {
+        return $this->belongsTo(Kelas::class, 'kelas_id');
+    }
+
+    // Relasi ke Presensi
     public function presensi()
     {
-        return $this->hasMany(Presensi::class);
+        return $this->hasMany(Presensi::class, 'siswa_id');
     }
 }

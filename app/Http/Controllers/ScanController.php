@@ -62,6 +62,8 @@ class ScanController extends Controller
             'siswa_id' => $siswa->id,
             'qr_session_id' => $session->id,
             'session_id' => $presensiSession?->id,
+            'tipe_sesi' => $presensiSession?->tipe_sesi ?? 'harian',
+            'mapel_id' => $presensiSession?->mapel_id,
             'tanggal' => today(),
             'waktu' => now(),
             'waktu_scan' => now(),

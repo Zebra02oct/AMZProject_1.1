@@ -11,11 +11,12 @@ class Presensi extends Model
 
     use HasFactory;
 
-    protected $fillable = ['siswa_id', 'session_id', 'qr_session_id', 'tanggal', 'waktu_scan', 'waktu', 'status'];
+    protected $fillable = ['siswa_id', 'session_id', 'qr_session_id', 'tanggal', 'waktu_scan', 'waktu', 'status', 'keterangan', 'tipe_sesi', 'mapel_id'];
 
     protected $casts = [
         'tanggal' => 'date',
         'waktu' => 'datetime:H:i',
+        'waktu_scan' => 'datetime',
     ];
 
     public function siswa()
@@ -31,6 +32,11 @@ class Presensi extends Model
     public function qrSession()
     {
         return $this->belongsTo(QrSession::class, 'qr_session_id');
+    }
+
+    public function mapel()
+    {
+        return $this->belongsTo(Mapel::class);
     }
 
     public function scopeToday($query)

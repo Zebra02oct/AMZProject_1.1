@@ -5,8 +5,9 @@
     @include('partials.head')
 </head>
 
-<body class="min-h-screen bg-white dark:bg-zinc-800">
-    <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+<body class="min-h-screen bg-[#fff6e6] dark:bg-[#2a1d0d]">
+    <flux:sidebar sticky stashable
+        class="border-r border-[#e5cb95] bg-[#fffaf0] dark:border-[#8d662b] dark:bg-[#2f210f]">
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
         <a href="{{ route('dashboard') }}" class="mr-5 flex items-center space-x-2" wire:navigate>
@@ -15,9 +16,11 @@
 
         @if (auth()->user()?->isAdmin())
             <nav class="space-y-1">
-                <h3 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-3 mt-6 mb-2">Admin</h3>
+                <h3
+                    class="text-xs font-semibold text-[#8b6a3c] dark:text-[#e5c58d] uppercase tracking-wider px-3 mt-6 mb-2">
+                    Admin</h3>
                 <a href="{{ route('admin.dashboard') }}"
-                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.dashboard') ? 'bg-[#f3dfb7] text-[#7a4f16] dark:bg-[#5a401a] dark:text-[#ffd889]' : 'text-[#8b6a3c] hover:bg-[#f8e9c8] hover:text-[#7a4f16] dark:text-[#e5c58d] dark:hover:bg-[#4a3618]' }}"
                     wire:navigate>
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -27,7 +30,7 @@
                     Dashboard
                 </a>
                 <a href="{{ route('admin.siswa') }}"
-                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.siswa') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.siswa') ? 'bg-[#f3dfb7] text-[#7a4f16] dark:bg-[#5a401a] dark:text-[#ffd889]' : 'text-[#8b6a3c] hover:bg-[#f8e9c8] hover:text-[#7a4f16] dark:text-[#e5c58d] dark:hover:bg-[#4a3618]' }}"
                     wire:navigate>
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -37,7 +40,7 @@
                     Manajemen Siswa
                 </a>
                 <a href="{{ route('admin.guru') }}"
-                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.guru') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.guru') ? 'bg-[#f3dfb7] text-[#7a4f16] dark:bg-[#5a401a] dark:text-[#ffd889]' : 'text-[#8b6a3c] hover:bg-[#f8e9c8] hover:text-[#7a4f16] dark:text-[#e5c58d] dark:hover:bg-[#4a3618]' }}"
                     wire:navigate>
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -46,7 +49,7 @@
                     Manajemen Guru
                 </a>
                 <a href="{{ route('admin.kelas') }}"
-                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.kelas') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.kelas') ? 'bg-[#f3dfb7] text-[#7a4f16] dark:bg-[#5a401a] dark:text-[#ffd889]' : 'text-[#8b6a3c] hover:bg-[#f8e9c8] hover:text-[#7a4f16] dark:text-[#e5c58d] dark:hover:bg-[#4a3618]' }}"
                     wire:navigate>
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -55,18 +58,28 @@
                     </svg>
                     Manajemen Kelas
                 </a>
+                <a href="{{ route('admin.mapel') }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.mapel') ? 'bg-[#f3dfb7] text-[#7a4f16] dark:bg-[#5a401a] dark:text-[#ffd889]' : 'text-[#8b6a3c] hover:bg-[#f8e9c8] hover:text-[#7a4f16] dark:text-[#e5c58d] dark:hover:bg-[#4a3618]' }}"
+                    wire:navigate>
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.483 9.246 5 7.5 5C5.754 5 4.168 5.483 3 6.253v13C4.168 18.483 5.754 18 7.5 18c1.746 0 3.332.483 4.5 1.253m0-13C13.168 5.483 14.754 5 16.5 5c1.746 0 3.332.483 4.5 1.253v13C19.832 18.483 18.246 18 16.5 18c-1.746 0-3.332.483-4.5 1.253">
+                        </path>
+                    </svg>
+                    Manajemen Mapel
+                </a>
                 <a href="{{ route('admin.presensi') }}"
-                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.presensi') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.presensi') ? 'bg-[#f3dfb7] text-[#7a4f16] dark:bg-[#5a401a] dark:text-[#ffd889]' : 'text-[#8b6a3c] hover:bg-[#f8e9c8] hover:text-[#7a4f16] dark:text-[#e5c58d] dark:hover:bg-[#4a3618]' }}"
                     wire:navigate>
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                         </path>
                     </svg>
-                    Presensi
+                    Presensi Kelas
                 </a>
                 <a href="{{ route('admin.laporan') }}"
-                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.laporan') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('admin.laporan') ? 'bg-[#f3dfb7] text-[#7a4f16] dark:bg-[#5a401a] dark:text-[#ffd889]' : 'text-[#8b6a3c] hover:bg-[#f8e9c8] hover:text-[#7a4f16] dark:text-[#e5c58d] dark:hover:bg-[#4a3618]' }}"
                     wire:navigate>
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -80,9 +93,11 @@
 
         @if (auth()->user()?->isGuru())
             <nav class="space-y-1">
-                <h3 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-3 mt-6 mb-2">Guru</h3>
+                <h3
+                    class="text-xs font-semibold text-[#8b6a3c] dark:text-[#e5c58d] uppercase tracking-wider px-3 mt-6 mb-2">
+                    Guru</h3>
                 <a href="{{ route('guru.dashboard') }}"
-                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('guru.dashboard') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('guru.dashboard') ? 'bg-[#f3dfb7] text-[#7a4f16] dark:bg-[#5a401a] dark:text-[#ffd889]' : 'text-[#8b6a3c] hover:bg-[#f8e9c8] hover:text-[#7a4f16] dark:text-[#e5c58d] dark:hover:bg-[#4a3618]' }}"
                     wire:navigate>
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -92,7 +107,7 @@
                     Dashboard
                 </a>
                 <a href="{{ route('guru.presensi') }}"
-                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('guru.presensi*') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('guru.presensi') || request()->routeIs('guru.presensi.create') ? 'bg-[#f3dfb7] text-[#7a4f16] dark:bg-[#5a401a] dark:text-[#ffd889]' : 'text-[#8b6a3c] hover:bg-[#f8e9c8] hover:text-[#7a4f16] dark:text-[#e5c58d] dark:hover:bg-[#4a3618]' }}"
                     wire:navigate>
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -101,8 +116,18 @@
                     </svg>
                     Presensi
                 </a>
+                <a href="{{ route('guru.presensi-mapel') }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('guru.presensi-mapel') ? 'bg-[#f3dfb7] text-[#7a4f16] dark:bg-[#5a401a] dark:text-[#ffd889]' : 'text-[#8b6a3c] hover:bg-[#f8e9c8] hover:text-[#7a4f16] dark:text-[#e5c58d] dark:hover:bg-[#4a3618]' }}"
+                    wire:navigate>
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0112 20.055a12.083 12.083 0 01-6.16-9.477L12 14z">
+                        </path>
+                    </svg>
+                    Presensi Mapel
+                </a>
                 <a href="{{ route('guru.riwayat') }}"
-                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('guru.riwayat') ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white' : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700' }}"
+                    class="flex items-center px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('guru.riwayat') ? 'bg-[#f3dfb7] text-[#7a4f16] dark:bg-[#5a401a] dark:text-[#ffd889]' : 'text-[#8b6a3c] hover:bg-[#f8e9c8] hover:text-[#7a4f16] dark:text-[#e5c58d] dark:hover:bg-[#4a3618]' }}"
                     wire:navigate>
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

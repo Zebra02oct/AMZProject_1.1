@@ -40,12 +40,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isAdmin(): bool
     {
-        return $this->role === 'Admin';
+        return strcasecmp((string) $this->role, 'Admin') === 0;
     }
 
     public function isGuru(): bool
     {
-        return $this->role === 'Guru';
+        return strcasecmp((string) $this->role, 'Guru') === 0;
+    }
+
+    public function isSiswa(): bool
+    {
+        return strcasecmp((string) $this->role, 'Siswa') === 0;
     }
 
     public function initials(): string
@@ -58,4 +63,24 @@ class User extends Authenticatable implements MustVerifyEmail
             ->take(2)
             ->implode('');
     }
+    public function siswa()
+    {
+        return $this->hasOne(Siswa::class, 'user_id');
+    }
+    // Relasi ke tabel Kelas (Sebagai Wali Kelas)
+    public function waliKelas()
+    {
+        return $this->hasOne(Kelas::class, 'wali_kelas_id');
+    }
+
+    // Relasi ke tabel Mapel (Banyak Guru bisa ajar Banyak Mapel)
+    public function mapels()
+    {
+        return $this->belongsToMany(Mapel::class, 'guru_mapel', 'guru_id', 'mapel_id');
+    }
+
+    // public function siswa()
+    // {
+    //     return $this->hasOne(Siswa::class);
+    // }
 }

@@ -25,7 +25,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'email' => fake()->unique()->userName() . '@guru.belajar.id',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
@@ -50,6 +50,34 @@ class UserFactory extends Factory
     {
         return $this->state(fn(array $attributes) => [
             'role' => 'Admin',
+        ]);
+    }
+
+    public function operatorAdmin(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'name' => 'Operator Sekolah',
+            'email' => 'admin@operator.belajar.id',
+            'role' => 'Admin',
+            'email_verified_at' => now(),
+        ]);
+    }
+
+    public function guruBelajar(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'role' => 'Guru',
+            'email' => fake()->unique()->userName() . '@guru.belajar.id',
+            'email_verified_at' => now(),
+        ]);
+    }
+
+    public function siswaBelajar(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'role' => 'Siswa',
+            'email' => fake()->unique()->userName() . '@siswa.belajar.id',
+            'email_verified_at' => now(),
         ]);
     }
 }
