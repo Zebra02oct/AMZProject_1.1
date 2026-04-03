@@ -32,7 +32,7 @@ it('can fetch current user via api me endpoint', function () {
     $token = $user->createToken('mobile-app')->plainTextToken;
 
     $response = $this
-        ->withHeader('Authorization', 'Bearer ' . $token)
+        ->withHeader('Authorization', 'Bearer '.$token)
         ->getJson('/api/me');
 
     $response
@@ -51,7 +51,7 @@ it('can logout and revoke current access token', function () {
     $token = $user->createToken('mobile-app')->plainTextToken;
 
     $response = $this
-        ->withHeader('Authorization', 'Bearer ' . $token)
+        ->withHeader('Authorization', 'Bearer '.$token)
         ->postJson('/api/logout');
 
     $response

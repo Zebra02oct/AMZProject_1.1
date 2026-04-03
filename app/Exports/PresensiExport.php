@@ -32,7 +32,7 @@ class PresensiExport implements FromCollection, WithHeadings, WithMapping
         extract($this->filters);
 
         $tipeSesi = $tipe_sesi ?? '';
-        if (!$canAccessHarian) {
+        if (! $canAccessHarian) {
             $tipeSesi = 'mapel';
         }
 
@@ -40,7 +40,7 @@ class PresensiExport implements FromCollection, WithHeadings, WithMapping
             $mapel_id = null;
         }
 
-        if (!empty($tipeSesi)) {
+        if (! empty($tipeSesi)) {
             $sessionQuery->where('tipe_sesi', $tipeSesi);
         }
 
@@ -57,7 +57,7 @@ class PresensiExport implements FromCollection, WithHeadings, WithMapping
             ->pluck('id');
 
         if (isset($mapel_id) && $mapel_id) {
-            if (!$allowedMapelIds->contains((int) $mapel_id)) {
+            if (! $allowedMapelIds->contains((int) $mapel_id)) {
                 return collect();
             }
 
@@ -106,7 +106,7 @@ class PresensiExport implements FromCollection, WithHeadings, WithMapping
             'Status',
             'Keterangan',
             'Sesi Mulai',
-            'Sesi Selesai'
+            'Sesi Selesai',
         ];
     }
 
@@ -136,7 +136,7 @@ class PresensiExport implements FromCollection, WithHeadings, WithMapping
                 return 'Tanpa Keterangan';
             })($presensi),
             $presensi->session->started_at->format('d/m/Y H:i'),
-            $presensi->session->ended_at?->format('d/m/Y H:i') ?? '-'
+            $presensi->session->ended_at?->format('d/m/Y H:i') ?? '-',
         ];
     }
 }

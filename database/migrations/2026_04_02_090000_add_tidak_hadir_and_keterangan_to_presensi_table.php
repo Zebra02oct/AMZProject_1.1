@@ -17,7 +17,7 @@ return new class extends Migration
             }
 
             Schema::table('presensi', function (Blueprint $table) {
-                if (!Schema::hasColumn('presensi', 'keterangan')) {
+                if (! Schema::hasColumn('presensi', 'keterangan')) {
                     $table->enum('keterangan', ['tanpa_keterangan', 'sakit'])
                         ->default('tanpa_keterangan')
                         ->after('status');

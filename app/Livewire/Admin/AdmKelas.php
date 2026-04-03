@@ -13,11 +13,17 @@ class AdmKelas extends Component
     use WithPagination;
 
     public $search = '';
+
     public $showForm = false;
+
     public $showDeleteConfirm = false;
+
     public $editingId = null;
+
     public $name = '';
+
     public $wali_kelas_id = '';
+
     public $guruList = [];
 
     public function mount()
@@ -33,7 +39,7 @@ class AdmKelas extends Component
     public function toggleForm($id = null)
     {
         $this->resetForm();
-        $this->showForm = !$this->showForm;
+        $this->showForm = ! $this->showForm;
         if ($id) {
             $kelas = Kelas::findOrFail($id);
             $this->editingId = $id;
@@ -45,10 +51,10 @@ class AdmKelas extends Component
     public function save()
     {
         $this->validate([
-            'name' => 'required|string|max:255|unique:kelas,name,' . ($this->editingId ?? 'NULL'),
+            'name' => 'required|string|max:255|unique:kelas,name,'.($this->editingId ?? 'NULL'),
             'wali_kelas_id' => [
                 'nullable',
-                Rule::exists('users', 'id')->where(fn($query) => $query->where('role', 'Guru')),
+                Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', 'Guru')),
                 Rule::unique('kelas', 'wali_kelas_id')->ignore($this->editingId),
             ],
         ]);
@@ -74,7 +80,8 @@ class AdmKelas extends Component
     {
         $kelas = Kelas::withCount('siswa')->find($id);
         if ($kelas->siswa_count > 0) {
-            $this->dispatch('swal-error', ['message' => 'Tidak bisa hapus kelas yang masih punya siswa! (' . $kelas->siswa_count . ' siswa)']);
+            $this->dispatch('swal-error', ['message' => 'Tidak bisa hapus kelas yang masih punya siswa! ('.$kelas->siswa_count.' siswa)']);
+
             return;
         }
         $this->showDeleteConfirm = true;

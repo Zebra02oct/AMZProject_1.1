@@ -14,17 +14,25 @@ class AdmMapel extends Component
     use WithPagination;
 
     public $search = '';
+
     public $selectedKelas = '';
+
     public $showForm = false;
+
     public $showDeleteConfirm = false;
+
     public $editingId = null;
 
     public $kode_mapel = '';
+
     public $nama_mapel = '';
+
     public $kelas_id = '';
+
     public $guru_id = '';
 
     public $kelasList = [];
+
     public $guruList = [];
 
     public function mount()
@@ -46,7 +54,7 @@ class AdmMapel extends Component
     public function toggleForm($id = null)
     {
         $this->resetForm();
-        $this->showForm = !$this->showForm;
+        $this->showForm = ! $this->showForm;
 
         if ($id) {
             $mapel = Mapel::with('gurus:id,name')->findOrFail($id);
@@ -67,7 +75,7 @@ class AdmMapel extends Component
             'kelas_id' => 'required|exists:kelas,id',
             'guru_id' => [
                 'required',
-                Rule::exists('users', 'id')->where(fn($query) => $query->where('role', 'Guru')),
+                Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', 'Guru')),
             ],
         ]);
 

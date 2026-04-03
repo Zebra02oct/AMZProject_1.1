@@ -14,14 +14,20 @@ use Livewire\Component;
 class AdmPresensi extends Component
 {
     public $kelasList = [];
-    public $selectedKelasId = '';
-    public $activeSession = null;
-    public $currentPresensi;
-    public $historySessions = [];
-    public $qrData = '';
-    public $totalSiswaInKelas = 0;
-    public $belumPresensi = 0;
 
+    public $selectedKelasId = '';
+
+    public $activeSession = null;
+
+    public $currentPresensi;
+
+    public $historySessions = [];
+
+    public $qrData = '';
+
+    public $totalSiswaInKelas = 0;
+
+    public $belumPresensi = 0;
 
     public function mount()
     {
@@ -41,11 +47,13 @@ class AdmPresensi extends Component
 
         if (PresensiSession::query()->active()->where('kelas_id', $this->selectedKelasId)->exists()) {
             $this->dispatch('swal-error', message: 'Ada sesi aktif untuk kelas ini! Tutup sesi sebelumnya.');
+
             return;
         }
 
-        if (!$this->selectedKelasId) {
+        if (! $this->selectedKelasId) {
             $this->dispatch('swal-error', message: 'Pilih kelas terlebih dahulu!');
+
             return;
         }
 

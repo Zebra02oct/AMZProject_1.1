@@ -16,9 +16,10 @@ class CheckGuru
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || !Auth::user()->isGuru()) {
+        if (! Auth::check() || ! Auth::user()->isGuru()) {
             abort(403);
         }
+
         return $next($request);
     }
 }

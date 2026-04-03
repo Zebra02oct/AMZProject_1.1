@@ -3,11 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Kelas;
+use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<\App\Models\Siswa>
+ * @extends Factory<Siswa>
  */
 class SiswaFactory extends Factory
 {

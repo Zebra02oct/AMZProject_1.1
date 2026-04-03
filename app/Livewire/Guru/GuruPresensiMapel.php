@@ -13,18 +13,31 @@ use Livewire\Component;
 class GuruPresensiMapel extends Component
 {
     public $selectedMapelId = '';
+
     public $latitude = null;
+
     public $longitude = null;
+
     public $activeSession = null;
+
     public $currentPresensi = [];
+
     public $totalSiswaInKelas = 0;
+
     public $hadirCount = 0;
+
     public $terlambatCount = 0;
+
     public $belumHadirCount = 0;
+
     public $qrData = '';
+
     public $sessionCountdown = 15 * 60;
+
     public $qrCountdown = 5 * 60;
+
     public $isSessionActive = false;
+
     public $mapelList = [];
 
     public function mount()
@@ -47,32 +60,37 @@ class GuruPresensiMapel extends Component
     {
         PresensiSession::cleanupExpired();
 
-        if (!$this->selectedMapelId) {
+        if (! $this->selectedMapelId) {
             $this->addError('selectedMapelId', 'Pilih mata pelajaran terlebih dahulu.');
+
             return;
         }
 
         $mapel = Mapel::with('kelas')->find($this->selectedMapelId);
 
-        if (!$mapel) {
+        if (! $mapel) {
             $this->dispatch('swal-error', message: 'Mata pelajaran tidak ditemukan.');
+
             return;
         }
 
         $isGuruPengampu = $mapel->gurus()->where('guru_id', Auth::id())->exists();
-        if (!$isGuruPengampu) {
+        if (! $isGuruPengampu) {
             $this->dispatch('swal-error', message: 'Anda tidak memiliki akses ke mata pelajaran ini.');
+
             return;
         }
 
         // Sementara testing: lokasi wajib dari browser/laptop, jangan lanjut jika kosong.
         if ($this->latitude === null || $this->longitude === null) {
             $this->dispatch('swal-error', message: 'Lokasi belum terdeteksi. Aktifkan izin lokasi browser lalu coba lagi.');
+
             return;
         }
 
-        if (!is_numeric($this->latitude) || !is_numeric($this->longitude)) {
+        if (! is_numeric($this->latitude) || ! is_numeric($this->longitude)) {
             $this->dispatch('swal-error', message: 'Format koordinat tidak valid.');
+
             return;
         }
 
@@ -81,6 +99,7 @@ class GuruPresensiMapel extends Component
 
         if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
             $this->dispatch('swal-error', message: 'Koordinat lokasi di luar rentang yang valid.');
+
             return;
         }
 
@@ -96,6 +115,7 @@ class GuruPresensiMapel extends Component
 
         if ($hasActiveMapelSession) {
             $this->dispatch('swal-error', message: 'Masih ada sesi presensi mapel yang aktif.');
+
             return;
         }
 
@@ -122,7 +142,7 @@ class GuruPresensiMapel extends Component
 
     public function refreshQr()
     {
-        if (!$this->activeSession) {
+        if (! $this->activeSession) {
             return;
         }
 
@@ -135,7 +155,7 @@ class GuruPresensiMapel extends Component
 
     public function closeSession()
     {
-        if (!$this->activeSession) {
+        if (! $this->activeSession) {
             return;
         }
 
@@ -162,8 +182,9 @@ class GuruPresensiMapel extends Component
             ->with(['kelas', 'mapel'])
             ->first();
 
-        if (!$this->activeSession) {
+        if (! $this->activeSession) {
             $this->resetSessionState();
+
             return;
         }
 
@@ -193,7 +214,7 @@ class GuruPresensiMapel extends Component
         $this->belumHadirCount = $this->totalSiswaInKelas;
 
         foreach ($this->currentPresensi as $presensi) {
-            if (!$presensi instanceof Presensi) {
+            if (! $presensi instanceof Presensi) {
                 continue;
             }
 

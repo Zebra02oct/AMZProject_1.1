@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
+use App\Livewire\Admin\AdmSiswa;
 use App\Models\Kelas;
 use App\Models\Siswa;
-use App\Livewire\Admin\AdmSiswa;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;

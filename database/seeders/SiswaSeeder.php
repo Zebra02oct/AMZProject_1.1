@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Siswa;
 use App\Models\Kelas;
+use App\Models\Siswa;
+use Illuminate\Database\Seeder;
 
 class SiswaSeeder extends Seeder
 {
@@ -16,7 +16,7 @@ class SiswaSeeder extends Seeder
 
         foreach ($kelas as $k) {
             foreach ($names as $name) {
-                Siswa::create(['name' => $name . ' (' . $k->name . ')', 'nis' => 'NIS' . rand(10000, 99999), 'kelas_id' => $k->id]);
+                Siswa::create(['name' => $name.' ('.$k->name.')', 'nis' => 'NIS'.rand(10000, 99999), 'kelas_id' => $k->id]);
             }
         }
     }

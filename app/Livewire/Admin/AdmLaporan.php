@@ -13,13 +13,19 @@ class AdmLaporan extends Component
     use WithPagination;
 
     public $dateFrom;
+
     public $dateTo;
+
     public $kelasId;
+
     public $filtersApplied = false;
 
     public $totalSiswa = 0;
+
     public $hadirCount = 0;
+
     public $telatCount = 0;
+
     public $absenCount = 0;
 
     public function mount()

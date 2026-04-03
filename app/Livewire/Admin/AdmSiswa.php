@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Siswa;
 use App\Models\Kelas;
+use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -18,17 +18,29 @@ class AdmSiswa extends Component
     use WithPagination;
 
     public $search = '';
+
     public $selectedKelas = '';
+
     public $kelasList = [];
+
     public $showForm = false;
+
     public $showDeleteConfirm = false;
+
     public $editingId = null;
+
     public $name = '';
+
     public $nis = '';
+
     public $kelas_id = '';
+
     public $phone = '';
+
     public $address = '';
+
     public $password = '';
+
     public $password_confirmation = '';
 
     public function mount()
@@ -49,7 +61,7 @@ class AdmSiswa extends Component
     public function toggleForm($id = null)
     {
         $this->resetForm();
-        $this->showForm = !$this->showForm;
+        $this->showForm = ! $this->showForm;
         if ($id) {
             $siswa = Siswa::findOrFail($id);
             $this->editingId = $id;
@@ -98,7 +110,7 @@ class AdmSiswa extends Component
                     $siswa = Siswa::with('user')->findOrFail($this->editingId);
                     $user = $siswa->user;
 
-                    if (!$user) {
+                    if (! $user) {
                         $user = User::create($this->buildSiswaUserPayload(true, '123456'));
                     } else {
                         $user->update($this->buildSiswaUserPayload(filled($this->password)));
@@ -116,7 +128,7 @@ class AdmSiswa extends Component
             $this->showForm = false;
             $this->dispatch('swal-success', ['message' => $isEditing ? 'Siswa berhasil diupdate!' : 'Siswa berhasil ditambahkan!']);
         } catch (\Exception $e) {
-            Log::error('Error saving siswa: ' . $e->getMessage());
+            Log::error('Error saving siswa: '.$e->getMessage());
             throw $e;
         }
     }
@@ -170,7 +182,7 @@ class AdmSiswa extends Component
 
     private function buildSiswaEmail(string $nis): string
     {
-        return $nis . '@siswa.local';
+        return $nis.'@siswa.local';
     }
 
     private function buildSiswaPayload(int $userId): array
@@ -220,7 +232,7 @@ class AdmSiswa extends Component
     public function render()
     {
         return view('livewire.admin.adm-siswa', [
-            'siswa' => $this->siswa
+            'siswa' => $this->siswa,
         ]);
     }
 }

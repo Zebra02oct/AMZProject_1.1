@@ -57,6 +57,7 @@ class Presensi extends Model
         if ($dateTo) {
             $query->whereDate('tanggal', '<=', $dateTo);
         }
+
         return $query;
     }
 
@@ -67,6 +68,7 @@ class Presensi extends Model
                 $q->where('kelas_id', $kelasId);
             });
         }
+
         return $query;
     }
 }

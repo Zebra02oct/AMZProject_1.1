@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\QrSession;
 use App\Models\Presensi;
 use App\Models\PresensiSession;
+use App\Models\QrSession;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -28,7 +28,7 @@ class ScanController extends Controller
             ->with('kelas')
             ->first();
 
-        if (!$session) {
+        if (! $session) {
             return response()->json(['error' => 'Sesi QR tidak valid atau sudah expired'], 400);
         }
 
@@ -36,7 +36,7 @@ class ScanController extends Controller
             ->where('kelas_id', $session->kelas_id)
             ->first();
 
-        if (!$siswa) {
+        if (! $siswa) {
             return response()->json(['error' => 'Siswa tidak ditemukan atau kelas tidak sesuai'], 400);
         }
 
@@ -72,7 +72,7 @@ class ScanController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Presensi berhasil! Status: ' . ucfirst($status),
+            'message' => 'Presensi berhasil! Status: '.ucfirst($status),
             'status' => $status,
         ]);
     }

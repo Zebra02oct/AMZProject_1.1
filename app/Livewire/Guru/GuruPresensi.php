@@ -12,17 +12,29 @@ use Livewire\Component;
 class GuruPresensi extends Component
 {
     public $latitude = null;
+
     public $longitude = null;
+
     public $activeSession = null;
+
     public $currentPresensi = [];
+
     public $totalSiswaInKelas = 0;
+
     public $hadirCount = 0;
+
     public $terlambatCount = 0;
+
     public $belumHadirCount = 0;
+
     public $qrData = '';
+
     public $sessionCountdown = 15 * 60; // 15 minutes in seconds
+
     public $qrCountdown = 5 * 60; // 5 minutes in seconds
+
     public $isSessionActive = false;
+
     public $guruKelas = null;
 
     public function mount()
@@ -42,19 +54,22 @@ class GuruPresensi extends Component
     {
         PresensiSession::cleanupExpired();
 
-        if (!$this->guruKelas) {
+        if (! $this->guruKelas) {
             $this->dispatch('swal-error', message: 'Anda tidak memiliki kelas yang ditugaskan sebagai wali kelas!');
+
             return;
         }
 
         // Sementara testing: lokasi wajib dari browser/laptop, jangan lanjut jika kosong.
         if ($this->latitude === null || $this->longitude === null) {
             $this->dispatch('swal-error', message: 'Lokasi belum terdeteksi. Aktifkan izin lokasi browser lalu coba lagi.');
+
             return;
         }
 
-        if (!is_numeric($this->latitude) || !is_numeric($this->longitude)) {
+        if (! is_numeric($this->latitude) || ! is_numeric($this->longitude)) {
             $this->dispatch('swal-error', message: 'Format koordinat lokasi tidak valid.');
+
             return;
         }
 
@@ -63,6 +78,7 @@ class GuruPresensi extends Component
 
         if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
             $this->dispatch('swal-error', message: 'Koordinat lokasi di luar rentang yang valid.');
+
             return;
         }
 
@@ -78,6 +94,7 @@ class GuruPresensi extends Component
             ->exists()
         ) {
             $this->dispatch('swal-error', message: 'Sesi aktif sudah berlangsung untuk kelas ini!');
+
             return;
         }
 
@@ -104,7 +121,9 @@ class GuruPresensi extends Component
 
     public function refreshQr()
     {
-        if (!$this->activeSession) return;
+        if (! $this->activeSession) {
+            return;
+        }
 
         // Update token for new QR (same session)
         $newToken = Str::random(40);
@@ -122,7 +141,7 @@ class GuruPresensi extends Component
 
             $this->activeSession->update([
                 'is_active' => false,
-                'ended_at' => now()
+                'ended_at' => now(),
             ]);
             $this->resetSessionState();
             $this->loadData();
@@ -179,7 +198,7 @@ class GuruPresensi extends Component
         $this->belumHadirCount = $this->totalSiswaInKelas;
 
         foreach ($this->currentPresensi as $presensi) {
-            if (!$presensi instanceof Presensi) {
+            if (! $presensi instanceof Presensi) {
                 continue;
             }
 

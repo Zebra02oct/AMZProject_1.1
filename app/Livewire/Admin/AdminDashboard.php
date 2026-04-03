@@ -13,18 +13,26 @@ use Livewire\Component;
 class AdminDashboard extends Component
 {
     public $totalSiswa;
+
     public $totalKelas;
+
     public $hariIniHadir;
+
     public $terlambat;
+
     public $totalPresensiHarianHariIni;
+
     public $totalPresensiMapelHariIni;
+
     public $belumPresensiHarian;
+
     public $presensiHariIni = [];
+
     public $chartData = [];
 
     public function mount(): void
     {
-        if (!Auth::user()?->isAdmin()) {
+        if (! Auth::user()?->isAdmin()) {
             abort(403);
         }
         $this->updateStats();

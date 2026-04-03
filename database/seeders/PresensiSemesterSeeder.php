@@ -34,7 +34,7 @@ class PresensiSemesterSeeder extends Seeder
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
 
         foreach ($period as $date) {
-            if (!$date->isMonday() && !$date->isThursday()) {
+            if (! $date->isMonday() && ! $date->isThursday()) {
                 continue;
             }
 
@@ -49,7 +49,7 @@ class PresensiSemesterSeeder extends Seeder
                 $isHarianSession = $date->isMonday();
                 $mapel = $isHarianSession ? null : $this->pickMapelForClass($kelas, $date);
 
-                if (!$isHarianSession && !$mapel) {
+                if (! $isHarianSession && ! $mapel) {
                     continue;
                 }
 
@@ -63,7 +63,7 @@ class PresensiSemesterSeeder extends Seeder
 
                 $presensiSession = PresensiSession::updateOrCreate(
                     [
-                        'session_token' => sha1('session|' . $sessionKey),
+                        'session_token' => sha1('session|'.$sessionKey),
                     ],
                     [
                         'kelas_id' => $kelas->id,
@@ -78,7 +78,7 @@ class PresensiSemesterSeeder extends Seeder
 
                 $qrSession = QrSession::updateOrCreate(
                     [
-                        'session_id' => sha1('qr|' . $sessionKey),
+                        'session_id' => sha1('qr|'.$sessionKey),
                     ],
                     [
                         'kelas_id' => $kelas->id,
@@ -137,7 +137,7 @@ class PresensiSemesterSeeder extends Seeder
         Carbon $startedAt,
         ?Mapel $mapel
     ): void {
-        $roll = crc32($presensiSession->session_token . '|' . $student->id) % 100;
+        $roll = crc32($presensiSession->session_token.'|'.$student->id) % 100;
 
         if ($roll < 72) {
             $status = 'hadir';
@@ -153,7 +153,7 @@ class PresensiSemesterSeeder extends Seeder
             $status = 'tidak_hadir';
             $waktuScan = null;
             $waktu = $startedAt->format('H:i:s');
-            $reasonRoll = crc32($presensiSession->session_token . '|reason|' . $student->id) % 100;
+            $reasonRoll = crc32($presensiSession->session_token.'|reason|'.$student->id) % 100;
             $keterangan = match (true) {
                 $reasonRoll < 40 => 'sakit',
                 $reasonRoll < 75 => 'izin',

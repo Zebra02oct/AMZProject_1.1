@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Kelas;
+use App\Models\Mapel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<\App\Models\Mapel>
+ * @extends Factory<Mapel>
  */
 class MapelFactory extends Factory
 {

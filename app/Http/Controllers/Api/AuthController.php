@@ -5,13 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
-
     public function login(Request $request)
     {
         $request->validate([
@@ -19,7 +17,7 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Cari user berdasarkan email di tabel users, 
+        // Cari user berdasarkan email di tabel users,
         // ATAU berdasarkan nis di relasi tabel siswa
         $user = User::with('siswa') // Eager load relasi siswa
             ->where('email', $request->nis_or_email)
@@ -115,7 +113,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         // Cek apakah password lama yang dimasukkan cocok dengan di database
-        if (!Hash::check($request->old_password, $user->password)) {
+        if (! Hash::check($request->old_password, $user->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Password lama tidak sesuai.',

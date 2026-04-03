@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Guru;
 
-use App\Exports\PresensiExport;
 use App\Exports\PresensiSummaryExport;
 use App\Models\Kelas;
 use App\Models\Mapel;
@@ -22,7 +21,9 @@ class GuruRiwayat extends Component
     protected $paginationTheme = 'tailwind';
 
     public $activeTab = 'riwayat';
+
     public $selectedSession = null;
+
     public $filters = [
         'tipe_sesi' => '',
         'kelas_id' => '',
@@ -30,19 +31,22 @@ class GuruRiwayat extends Component
         'date' => '',
         'date_start' => '',
         'date_end' => '',
-        'quick_range' => ''
+        'quick_range' => '',
     ];
 
     public $presensiList = [];
+
     public $rekapData = [];
+
     public $mapelList = [];
+
     public $canAccessHarian = false;
 
     public function mount()
     {
         $this->canAccessHarian = Kelas::where('wali_kelas_id', Auth::id())->exists();
 
-        if (!$this->canAccessHarian) {
+        if (! $this->canAccessHarian) {
             $this->filters['tipe_sesi'] = 'mapel';
         }
 
@@ -107,7 +111,7 @@ class GuruRiwayat extends Component
         $query = PresensiSession::with(['kelas', 'mapel', 'presensis.siswa'])
             ->where('guru_id', Auth::id());
 
-        if (!$this->canAccessHarian) {
+        if (! $this->canAccessHarian) {
             $query->where('tipe_sesi', 'mapel');
         }
 
@@ -123,7 +127,7 @@ class GuruRiwayat extends Component
 
     public function updateKeterangan(int $presensiId, string $keterangan): void
     {
-        if (!in_array($keterangan, ['tanpa_keterangan', 'sakit', 'izin'], true)) {
+        if (! in_array($keterangan, ['tanpa_keterangan', 'sakit', 'izin'], true)) {
             return;
         }
 
@@ -133,7 +137,7 @@ class GuruRiwayat extends Component
             })
             ->first();
 
-        if (!$presensi || $presensi->status !== 'tidak_hadir') {
+        if (! $presensi || $presensi->status !== 'tidak_hadir') {
             return;
         }
 
@@ -154,7 +158,6 @@ class GuruRiwayat extends Component
         $this->selectedSession = null;
         $this->presensiList = [];
     }
-
 
     public function loadRekap()
     {
@@ -180,6 +183,7 @@ class GuruRiwayat extends Component
 
         if ($sessionIds->isEmpty()) {
             $this->rekapData = [];
+
             return;
         }
 
@@ -228,13 +232,14 @@ class GuruRiwayat extends Component
     {
         $this->normalizeFilters();
 
-        if (!$this->canExportExcel()) {
+        if (! $this->canExportExcel()) {
             $this->dispatch('export-filter-required', message: 'Harus pilih rentang cepat, tipe sesi, dan kelas (dan mapel jika tipe mapel).');
+
             return;
         }
 
         // Use the summary export (No | Nama | Minggu 1-3 | Total)
-        return Excel::download(new PresensiSummaryExport($this->filters), 'rekap-presensi-summary-' . now()->format('Y-m-d') . '.xlsx');
+        return Excel::download(new PresensiSummaryExport($this->filters), 'rekap-presensi-summary-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function exportPdf()
@@ -291,7 +296,7 @@ class GuruRiwayat extends Component
 
     private function applySessionFilters($query): void
     {
-        if (!$this->canAccessHarian) {
+        if (! $this->canAccessHarian) {
             $query->where('tipe_sesi', 'mapel');
         } elseif ($this->filters['tipe_sesi']) {
             $query->where('tipe_sesi', $this->filters['tipe_sesi']);
@@ -338,7 +343,7 @@ class GuruRiwayat extends Component
 
     private function normalizeFilters(): void
     {
-        if (!$this->canAccessHarian) {
+        if (! $this->canAccessHarian) {
             $this->filters['tipe_sesi'] = 'mapel';
         }
 
@@ -347,12 +352,12 @@ class GuruRiwayat extends Component
         }
 
         // If quick range is selected, compute date_start/date_end and disable manual range
-        if (!empty($this->filters['quick_range'])) {
+        if (! empty($this->filters['quick_range'])) {
             $this->applyQuickRangeToDates($this->filters['quick_range']);
         }
 
         $allowedKelasIds = $this->getAllowedKelasIds();
-        if ($this->filters['kelas_id'] && !$allowedKelasIds->contains((int) $this->filters['kelas_id'])) {
+        if ($this->filters['kelas_id'] && ! $allowedKelasIds->contains((int) $this->filters['kelas_id'])) {
             $this->filters['kelas_id'] = '';
             $this->filters['mapel_id'] = '';
         }
@@ -364,6 +369,7 @@ class GuruRiwayat extends Component
     {
         if ($this->filters['tipe_sesi'] === 'harian') {
             $this->mapelList = collect();
+
             return;
         }
 
@@ -375,7 +381,7 @@ class GuruRiwayat extends Component
 
         $this->mapelList = $query->orderBy('nama_mapel')->get();
 
-        if ($this->filters['mapel_id'] && !collect($this->mapelList)->pluck('id')->contains((int) $this->filters['mapel_id'])) {
+        if ($this->filters['mapel_id'] && ! collect($this->mapelList)->pluck('id')->contains((int) $this->filters['mapel_id'])) {
             $this->filters['mapel_id'] = '';
         }
     }
@@ -385,7 +391,7 @@ class GuruRiwayat extends Component
         $waliKelasIds = Kelas::where('wali_kelas_id', Auth::id())->pluck('id');
         $mapelKelasIds = $this->getGuruMapelQuery()->pluck('kelas_id')->filter();
 
-        if (!$this->canAccessHarian || $this->filters['tipe_sesi'] === 'mapel') {
+        if (! $this->canAccessHarian || $this->filters['tipe_sesi'] === 'mapel') {
             return $mapelKelasIds->unique()->values();
         }
 

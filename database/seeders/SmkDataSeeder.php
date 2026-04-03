@@ -88,8 +88,8 @@ class SmkDataSeeder extends Seeder
             $nis = sprintf('26%06d', $i);
 
             $user = User::factory()->siswaBelajar()->create([
-                'name' => 'Siswa ' . str_pad((string) $i, 3, '0', STR_PAD_LEFT),
-                'email' => 'siswa' . $i . '@siswa.belajar.id',
+                'name' => 'Siswa '.str_pad((string) $i, 3, '0', STR_PAD_LEFT),
+                'email' => 'siswa'.$i.'@siswa.belajar.id',
                 'password' => Hash::make('password'),
             ]);
 
@@ -100,8 +100,8 @@ class SmkDataSeeder extends Seeder
                 'nis' => $nis,
                 'kelas_id' => $kelas->id,
                 'user_id' => $user->id,
-                'phone' => '08' . str_pad((string) (811000000 + $i), 10, '0', STR_PAD_LEFT),
-                'address' => 'Alamat siswa ' . $i,
+                'phone' => '08'.str_pad((string) (811000000 + $i), 10, '0', STR_PAD_LEFT),
+                'address' => 'Alamat siswa '.$i,
             ]);
         }
     }

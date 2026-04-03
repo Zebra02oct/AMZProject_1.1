@@ -9,7 +9,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('presensi')) {
+        if (! Schema::hasTable('presensi')) {
             return;
         }
 
@@ -44,14 +44,14 @@ return new class extends Migration
                         ->after('status');
                 });
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // If change() is not available or fails, developer intervention may be required.
         }
     }
 
     public function down(): void
     {
-        if (!Schema::hasTable('presensi')) {
+        if (! Schema::hasTable('presensi')) {
             return;
         }
 
@@ -61,6 +61,7 @@ return new class extends Migration
             // Normalize any existing 'izin' values before altering enum
             DB::table('presensi')->where('keterangan', 'izin')->update(['keterangan' => 'tanpa_keterangan']);
             DB::statement("ALTER TABLE presensi MODIFY keterangan ENUM('tanpa_keterangan','sakit') NOT NULL DEFAULT 'tanpa_keterangan'");
+
             return;
         }
 
@@ -71,7 +72,7 @@ return new class extends Migration
                     ->default('tanpa_keterangan')
                     ->change();
             });
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // ignore
         }
     }

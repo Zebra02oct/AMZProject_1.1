@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    /** @use HasFactory<UserFactory> */
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -59,14 +60,16 @@ class User extends Authenticatable implements MustVerifyEmail
             ->trim()
             ->explode(' ')
             ->filter()
-            ->map(fn(string $part) => Str::substr($part, 0, 1))
+            ->map(fn (string $part) => Str::substr($part, 0, 1))
             ->take(2)
             ->implode('');
     }
+
     public function siswa()
     {
         return $this->hasOne(Siswa::class, 'user_id');
     }
+
     // Relasi ke tabel Kelas (Sebagai Wali Kelas)
     public function waliKelas()
     {

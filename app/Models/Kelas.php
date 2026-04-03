@@ -17,6 +17,7 @@ class Kelas extends Model
     {
         return $this->hasMany(Siswa::class);
     }
+
     // Relasi ke Guru yang menjadi Wali Kelas
     public function waliKelas()
     {

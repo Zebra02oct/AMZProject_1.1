@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\User;
-use App\Models\Kelas; // if needed
+// if needed
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -13,12 +13,19 @@ class AdmGuru extends Component
     use WithPagination;
 
     public $search = '';
+
     public $showForm = false;
+
     public $showDeleteConfirm = false;
+
     public $editingId = null;
+
     public $name = '';
+
     public $email = '';
+
     public $password = '';
+
     public $password_confirmation = '';
 
     public function mount()
@@ -34,7 +41,7 @@ class AdmGuru extends Component
     public function toggleForm($id = null)
     {
         $this->resetForm();
-        $this->showForm = !$this->showForm;
+        $this->showForm = ! $this->showForm;
         if ($id) {
             $guru = User::find($id);
             $this->editingId = $id;
@@ -48,7 +55,7 @@ class AdmGuru extends Component
     {
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . ($this->editingId ?? 'NULL'),
+            'email' => 'required|email|unique:users,email,'.($this->editingId ?? 'NULL'),
         ];
 
         $data = [
@@ -57,7 +64,7 @@ class AdmGuru extends Component
             'role' => 'Guru',
         ];
 
-        if (!$this->editingId) {
+        if (! $this->editingId) {
             $rules['password'] = 'required|confirmed|min:8';
             $data['password'] = Hash::make($this->password);
         } elseif ($this->password) {
@@ -83,6 +90,7 @@ class AdmGuru extends Component
     {
         if (auth()->id() == $id) {
             $this->dispatch('swal-error', ['message' => 'Tidak bisa hapus akun sendiri!']);
+
             return;
         }
         $this->showDeleteConfirm = true;

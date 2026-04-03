@@ -3,22 +3,23 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\PresensiSession;
 use App\Models\Presensi;
+use App\Models\PresensiSession;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Carbon\Carbon;
 
 class PresensiController extends Controller
 {
     private $school_lat = -1.273709; // Koordinat Surabaya contoh
+
     private $school_lng = 1.273709;
+
     private $gps_radius = 0.075; // 75m dalam km
 
     /**
@@ -31,6 +32,7 @@ class PresensiController extends Controller
         $dLng = deg2rad($lng2 - $lng1);
         $a = sin($dLat / 2) * sin($dLat / 2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) * sin($dLng / 2);
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
         return $earth_radius * $c;
     }
 
@@ -53,7 +55,7 @@ class PresensiController extends Controller
         }
 
         $user = Auth::user();
-        if (!$user || !$user->isGuru()) {
+        if (! $user || ! $user->isGuru()) {
             return response()->json(['error' => 'Hanya guru yang boleh mulai sesi'], 403);
         }
 
@@ -62,7 +64,7 @@ class PresensiController extends Controller
         if ($activeSession) {
             return response()->json([
                 'error' => 'Sesi masih aktif',
-                'session' => $activeSession
+                'session' => $activeSession,
             ], 409);
         }
 
@@ -75,18 +77,20 @@ class PresensiController extends Controller
                 'latitude' => $request->lat,
                 'longitude' => $request->lng,
                 'is_active' => true,
-                'started_at' => now()
+                'started_at' => now(),
             ]);
 
             DB::commit();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Sesi presensi dimulai',
-                'session' => $session->load('kelas')
+                'session' => $session->load('kelas'),
             ]);
         } catch (\Exception $e) {
             DB::rollback();
-            Log::error('Gagal start sesi: ' . $e->getMessage());
+            Log::error('Gagal start sesi: '.$e->getMessage());
+
             return response()->json(['error' => 'Gagal memulai sesi'], 500);
         }
     }
@@ -100,7 +104,7 @@ class PresensiController extends Controller
         $session = PresensiSession::with('kelas')->findOrFail($id);
         $user = Auth::user();
 
-        if ($session->guru_id !== $user->id || !$session->is_active) {
+        if ($session->guru_id !== $user->id || ! $session->is_active) {
             return response()->json(['error' => 'Sesi tidak valid atau tidak aktif'], 403);
         }
 
@@ -109,14 +113,14 @@ class PresensiController extends Controller
             'session_id' => $session->id,
             'token' => $session->session_token,
             'kelas_id' => $session->kelas_id,
-            'timestamp' => now()->timestamp
+            'timestamp' => now()->timestamp,
         ]);
 
         return response()->json([
             'success' => true,
             'session' => $session,
             'qr_content' => $qrContent,
-            'qr_url' => null // Generate di frontend dengan qrcode.min.js
+            'qr_url' => null, // Generate di frontend dengan qrcode.min.js
         ]);
     }
 
@@ -129,11 +133,12 @@ class PresensiController extends Controller
         $session = PresensiSession::findOrFail($id);
         $user = Auth::user();
 
-        if ($session->guru_id !== $user->id || !$session->is_active) {
+        if ($session->guru_id !== $user->id || ! $session->is_active) {
             return response()->json(['error' => 'Tidak diizinkan'], 403);
         }
 
         $session->update(['session_token' => Str::random(32)]);
+
         return response()->json(['success' => true, 'message' => 'QR direfresh']);
     }
 
@@ -146,7 +151,7 @@ class PresensiController extends Controller
         $session = PresensiSession::with(['presensis.siswa', 'kelas'])->findOrFail($id);
         $user = Auth::user();
 
-        if ($session->guru_id !== $user->id || !$session->is_active) {
+        if ($session->guru_id !== $user->id || ! $session->is_active) {
             return response()->json(['error' => 'Tidak diizinkan'], 403);
         }
 
@@ -159,9 +164,9 @@ class PresensiController extends Controller
             'stats' => [
                 'hadir' => $hadir,
                 'total' => $totalSiswa,
-                'persentase' => $totalSiswa ? round(($hadir / $totalSiswa) * 100, 1) : 0
+                'persentase' => $totalSiswa ? round(($hadir / $totalSiswa) * 100, 1) : 0,
             ],
-            'presensi_list' => $session->presensis()->with('siswa')->latest()->take(20)->get()
+            'presensi_list' => $session->presensis()->with('siswa')->latest()->take(20)->get(),
         ]);
     }
 
@@ -180,7 +185,7 @@ class PresensiController extends Controller
 
         $session->update([
             'is_active' => false,
-            'ended_at' => now()
+            'ended_at' => now(),
         ]);
 
         return response()->json(['success' => true, 'message' => 'Sesi ditutup']);
@@ -199,7 +204,7 @@ class PresensiController extends Controller
             'qr_data' => 'required|string',
             'lat' => 'required|numeric|between:-90,90',
             'lng' => 'required|numeric|between:-180,180',
-            'nis' => 'nullable|string'
+            'nis' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -212,10 +217,10 @@ class PresensiController extends Controller
                 ->where('is_active', true)
                 ->first();
 
-            if (!$session) {
+            if (! $session) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Sesi presensi tidak aktif atau QR code sudah expired'
+                    'message' => 'Sesi presensi tidak aktif atau QR code sudah expired',
                 ], 410);
             }
 
@@ -234,10 +239,10 @@ class PresensiController extends Controller
             }
 
             $user = Auth::user();
-            if (!$user || !$user->isSiswa()) {
+            if (! $user || ! $user->isSiswa()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Hanya siswa yang diperbolehkan melakukan presensi'
+                    'message' => 'Hanya siswa yang diperbolehkan melakukan presensi',
                 ], 403);
             }
 
@@ -246,10 +251,10 @@ class PresensiController extends Controller
                 ->where('kelas_id', $session->kelas_id)
                 ->first();
 
-            if (!$siswa) {
+            if (! $siswa) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Kamu tidak terdaftar di kelas untuk sesi presensi ini'
+                    'message' => 'Kamu tidak terdaftar di kelas untuk sesi presensi ini',
                 ], 404);
             }
 
@@ -261,7 +266,7 @@ class PresensiController extends Controller
             if ($exists) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Kamu sudah melakukan presensi di sesi ini'
+                    'message' => 'Kamu sudah melakukan presensi di sesi ini',
                 ], 409);
             }
 
@@ -280,23 +285,23 @@ class PresensiController extends Controller
                 'tanggal' => $waktuScan->toDateString(),
                 'waktu_scan' => $waktuScan,
                 'waktu' => $waktuScan->format('H:i'),
-                'status' => $status
+                'status' => $status,
             ]);
             DB::commit();
 
             // 5. Response Sukses
             return response()->json([
                 'success' => true,
-                'message' => 'Presensi berhasil dicatat sebagai: ' . ucfirst($status),
-                'data' => $presensi->load('siswa', 'session.kelas')
+                'message' => 'Presensi berhasil dicatat sebagai: '.ucfirst($status),
+                'data' => $presensi->load('siswa', 'session.kelas'),
             ], 200);
         } catch (\Exception $e) {
             DB::rollback();
-            Log::error('Scan presensi error: ' . $e->getMessage());
+            Log::error('Scan presensi error: '.$e->getMessage());
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal melakukan presensi sistem: ' . $e->getMessage()
+                'message' => 'Gagal melakukan presensi sistem: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -310,7 +315,7 @@ class PresensiController extends Controller
         $user = Auth::user();
         $siswa = Siswa::where('user_id', $user->id)->first();
 
-        if (!$siswa) {
+        if (! $siswa) {
             return response()->json(['error' => 'Siswa tidak ditemukan'], 404);
         }
 
@@ -325,7 +330,7 @@ class PresensiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $presensi
+            'data' => $presensi,
         ]);
     }
 
@@ -338,7 +343,7 @@ class PresensiController extends Controller
         $user = Auth::user();
         $siswa = Siswa::where('user_id', $user->id)->first();
 
-        if (!$siswa) {
+        if (! $siswa) {
             return response()->json(['error' => 'Siswa tidak ditemukan'], 404);
         }
 
@@ -349,7 +354,7 @@ class PresensiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $todayPresensi
+            'data' => $todayPresensi,
         ]);
     }
 
@@ -362,7 +367,7 @@ class PresensiController extends Controller
     public function laporan(Request $request)
     {
         $user = Auth::user();
-        if (!$user || !$user->isAdmin()) {
+        if (! $user || ! $user->isAdmin()) {
             return response()->json(['error' => 'Hanya admin'], 403);
         }
 
@@ -379,9 +384,9 @@ class PresensiController extends Controller
             'success' => true,
             'stats' => [
                 'total_hadir' => $total,
-                'periode' => $request->date_from . ' s/d ' . ($request->date_to ?? now()->format('Y-m-d'))
+                'periode' => $request->date_from.' s/d '.($request->date_to ?? now()->format('Y-m-d')),
             ],
-            'data' => $data
+            'data' => $data,
         ]);
     }
 }

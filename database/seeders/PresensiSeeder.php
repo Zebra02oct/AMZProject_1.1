@@ -2,12 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Presensi;
-use App\Models\Siswa;
 use App\Models\PresensiSession;
 use App\Models\QrSession;
+use App\Models\Siswa;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class PresensiSeeder extends Seeder
 {
@@ -25,7 +26,7 @@ class PresensiSeeder extends Seeder
             ],
             [
                 'guru_id' => 1,
-                'session_token' => \Illuminate\Support\Str::random(40),
+                'session_token' => Str::random(40),
                 'ended_at' => $today->endOfDay(),
             ]
         );
@@ -36,7 +37,7 @@ class PresensiSeeder extends Seeder
                 'started_at' => $today->startOfDay(),
             ],
             [
-                'session_id' => (string) \Illuminate\Support\Str::uuid(),
+                'session_id' => (string) Str::uuid(),
                 'active' => false,
                 'expired_at' => $today->endOfDay(),
             ]

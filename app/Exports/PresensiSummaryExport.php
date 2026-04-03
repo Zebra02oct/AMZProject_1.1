@@ -34,7 +34,7 @@ class PresensiSummaryExport implements FromCollection, WithHeadings
         $filters = $this->filters;
 
         $tipeSesi = $filters['tipe_sesi'] ?? '';
-        if (!$canAccessHarian) {
+        if (! $canAccessHarian) {
             $tipeSesi = 'mapel';
         }
 
@@ -42,24 +42,24 @@ class PresensiSummaryExport implements FromCollection, WithHeadings
             $filters['mapel_id'] = null;
         }
 
-        if (!empty($tipeSesi)) {
+        if (! empty($tipeSesi)) {
             $sessionQuery->where('tipe_sesi', $tipeSesi);
         }
 
-        if (!empty($filters['kelas_id'])) {
+        if (! empty($filters['kelas_id'])) {
             $sessionQuery->where('kelas_id', $filters['kelas_id']);
         }
 
         $allowedMapelIds = Mapel::whereHas('gurus', function ($query) use ($guruId) {
             $query->where('guru_id', $guruId);
         })
-            ->when(!empty($filters['kelas_id']), function ($query) use ($filters) {
+            ->when(! empty($filters['kelas_id']), function ($query) use ($filters) {
                 $query->where('kelas_id', $filters['kelas_id']);
             })
             ->pluck('id');
 
-        if (!empty($filters['mapel_id'])) {
-            if (!$allowedMapelIds->contains((int)$filters['mapel_id'])) {
+        if (! empty($filters['mapel_id'])) {
+            if (! $allowedMapelIds->contains((int) $filters['mapel_id'])) {
                 return collect();
             }
 
@@ -72,11 +72,11 @@ class PresensiSummaryExport implements FromCollection, WithHeadings
             $sessionQuery->whereIn('mapel_id', $allowedMapelIds);
         }
 
-        if (!empty($filters['date_start'])) {
+        if (! empty($filters['date_start'])) {
             $sessionQuery->whereDate('started_at', '>=', $filters['date_start']);
         }
 
-        if (!empty($filters['date_end'])) {
+        if (! empty($filters['date_end'])) {
             $sessionQuery->whereDate('started_at', '<=', $filters['date_end']);
         }
 
@@ -92,7 +92,7 @@ class PresensiSummaryExport implements FromCollection, WithHeadings
         $studentQuery = Siswa::with('kelas')
             ->whereIn('kelas_id', $kelasIds->filter());
 
-        if (!empty($filters['kelas_id'])) {
+        if (! empty($filters['kelas_id'])) {
             $studentQuery->where('kelas_id', $filters['kelas_id']);
         }
 
@@ -104,10 +104,10 @@ class PresensiSummaryExport implements FromCollection, WithHeadings
             ->groupBy('siswa_id');
 
         // Determine week ranges (consecutive 7-day blocks) between date_start and date_end
-        $start = !empty($filters['date_start']) ? Carbon::parse($filters['date_start'])->startOfDay() : null;
-        $end = !empty($filters['date_end']) ? Carbon::parse($filters['date_end'])->endOfDay() : null;
+        $start = ! empty($filters['date_start']) ? Carbon::parse($filters['date_start'])->startOfDay() : null;
+        $end = ! empty($filters['date_end']) ? Carbon::parse($filters['date_end'])->endOfDay() : null;
 
-        if (!$start || !$end) {
+        if (! $start || ! $end) {
             $start = $sessions->min('started_at') ? Carbon::parse($sessions->min('started_at'))->startOfDay() : Carbon::now()->startOfDay();
             $end = $sessions->max('started_at') ? Carbon::parse($sessions->max('started_at'))->endOfDay() : Carbon::now()->endOfDay();
         }
@@ -141,16 +141,19 @@ class PresensiSummaryExport implements FromCollection, WithHeadings
 
                 $izin = $presByStudent->filter(function ($p) use ($s, $e) {
                     $date = $p->tanggal ? Carbon::parse($p->tanggal) : null;
+
                     return $date && $date->between($s, $e) && $p->status === 'tidak_hadir' && (($p->keterangan ?? 'tanpa_keterangan') === 'izin');
                 })->count();
 
                 $sakit = $presByStudent->filter(function ($p) use ($s, $e) {
                     $date = $p->tanggal ? Carbon::parse($p->tanggal) : null;
+
                     return $date && $date->between($s, $e) && $p->status === 'tidak_hadir' && (($p->keterangan ?? 'tanpa_keterangan') === 'sakit');
                 })->count();
 
                 $tanpa = $presByStudent->filter(function ($p) use ($s, $e) {
                     $date = $p->tanggal ? Carbon::parse($p->tanggal) : null;
+
                     return $date && $date->between($s, $e) && $p->status === 'tidak_hadir' && (($p->keterangan ?? 'tanpa_keterangan') === 'tanpa_keterangan');
                 })->count();
 
@@ -172,10 +175,10 @@ class PresensiSummaryExport implements FromCollection, WithHeadings
     {
         $filters = $this->filters ?? [];
 
-        $start = !empty($filters['date_start']) ? Carbon::parse($filters['date_start'])->startOfDay() : null;
-        $end = !empty($filters['date_end']) ? Carbon::parse($filters['date_end'])->endOfDay() : null;
+        $start = ! empty($filters['date_start']) ? Carbon::parse($filters['date_start'])->startOfDay() : null;
+        $end = ! empty($filters['date_end']) ? Carbon::parse($filters['date_end'])->endOfDay() : null;
 
-        if (!$start || !$end) {
+        if (! $start || ! $end) {
             $start = Carbon::now()->startOfDay();
             $end = Carbon::now()->endOfDay();
         }

@@ -65,7 +65,7 @@ class PresensiSession extends Model
             ->where('started_at', '<', now()->subMinutes(15))
             ->update([
                 'is_active' => false,
-                'ended_at' => now()
+                'ended_at' => now(),
             ]);
     }
 }

@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
@@ -22,7 +20,7 @@ return new class extends Migration
             DB::table('presensi')
                 ->where('id', $record->id)
                 ->update([
-                    'waktu_scan' => $record->tanggal . ' ' . $record->waktu
+                    'waktu_scan' => $record->tanggal.' '.$record->waktu,
                 ]);
         }
 
