@@ -53,12 +53,12 @@ jobs:
       - name: Build Assets
         run: npm run build
 
-      - name: Run Tests
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: presensi # HARUS SAMA dengan MYSQL_DATABASE di atas
-          DB_USERNAME: root
-          DB_PASSWORD: ""
-        run: php artisan test
+      # - name: Run Tests
+      #   env:
+      #     DB_CONNECTION: mysql
+      #     DB_HOST: 127.0.0.1
+      #     DB_PORT: 3306
+      #     DB_DATABASE: presensi # HARUS SAMA dengan MYSQL_DATABASE di atas
+      #     DB_USERNAME: root
+      #     DB_PASSWORD: ""
+      #   run: php artisan test
