@@ -225,12 +225,12 @@ class PresensiController extends Controller
                 $distance = $this->haversine($request->lat, $request->lng, $session->latitude, $session->longitude);
 
                 // Radius 50 meter (0.05 km)
-                if ($distance > 0.05) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Gagal presensi: Kamu berada di luar jangkauan area guru (' . round($distance * 1000) . ' meter).'
-                    ], 403);
-                }
+                // if ($distance > 0.05) {
+                //     return response()->json([
+                //         'success' => false,
+                //         'message' => 'Gagal presensi: Kamu berada di luar jangkauan area guru (' . round($distance * 1000) . ' meter).'
+                //     ], 403);
+                // }
             }
 
             $user = Auth::user();

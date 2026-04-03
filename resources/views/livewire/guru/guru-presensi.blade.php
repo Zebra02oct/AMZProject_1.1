@@ -109,7 +109,6 @@
                         alert('Gagal mendapatkan lokasi. Pastikan izin lokasi/GPS diizinkan di browser laptopmu.');
                         component.set('latitude', null);
                         component.set('longitude', null);
-                        component.call('startSession');
                     }, {
                         enableHighAccuracy: true,
                         timeout: 5000,
@@ -119,7 +118,6 @@
                 alert('Browser kamu tidak mendukung deteksi lokasi.');
                 component.set('latitude', null);
                 component.set('longitude', null);
-                component.call('startSession');
             }
         }
 

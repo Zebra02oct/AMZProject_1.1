@@ -3,11 +3,13 @@
 namespace App\Livewire\Guru;
 
 use App\Exports\PresensiExport;
+use App\Exports\PresensiSummaryExport;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\Presensi;
 use App\Models\PresensiSession;
 use App\Models\Siswa;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -27,7 +29,8 @@ class GuruRiwayat extends Component
         'mapel_id' => '',
         'date' => '',
         'date_start' => '',
-        'date_end' => ''
+        'date_end' => '',
+        'quick_range' => ''
     ];
 
     public $presensiList = [];
@@ -83,6 +86,7 @@ class GuruRiwayat extends Component
             'date' => '',
             'date_start' => '',
             'date_end' => '',
+            'quick_range' => '',
         ];
 
         $this->normalizeFilters();
@@ -119,7 +123,7 @@ class GuruRiwayat extends Component
 
     public function updateKeterangan(int $presensiId, string $keterangan): void
     {
-        if (!in_array($keterangan, ['tanpa_keterangan', 'sakit'], true)) {
+        if (!in_array($keterangan, ['tanpa_keterangan', 'sakit', 'izin'], true)) {
             return;
         }
 
@@ -150,6 +154,7 @@ class GuruRiwayat extends Component
         $this->selectedSession = null;
         $this->presensiList = [];
     }
+
 
     public function loadRekap()
     {
@@ -202,6 +207,7 @@ class GuruRiwayat extends Component
             $terlambat = $presensi->where('status', 'terlambat')->count();
             $tidakHadir = $presensi->where('status', 'tidak_hadir')->count();
             $sakit = $presensi->where('status', 'tidak_hadir')->where('keterangan', 'sakit')->count();
+            $izin = $presensi->where('status', 'tidak_hadir')->where('keterangan', 'izin')->count();
             $tanpaKeterangan = $presensi->where('status', 'tidak_hadir')->where('keterangan', 'tanpa_keterangan')->count();
             $totalSessions = $hadir + $terlambat + $tidakHadir;
 
@@ -211,6 +217,7 @@ class GuruRiwayat extends Component
                 'terlambat' => $terlambat,
                 'tidak_hadir' => $tidakHadir,
                 'sakit' => $sakit,
+                'izin' => $izin,
                 'tanpa_keterangan' => $tanpaKeterangan,
                 'total_sesi' => $totalSessions,
             ];
@@ -220,7 +227,14 @@ class GuruRiwayat extends Component
     public function exportExcel()
     {
         $this->normalizeFilters();
-        return Excel::download(new PresensiExport($this->filters), 'rekap-presensi-' . now()->format('Y-m-d') . '.xlsx');
+
+        if (!$this->canExportExcel()) {
+            $this->dispatch('export-filter-required', message: 'Harus pilih rentang cepat, tipe sesi, dan kelas (dan mapel jika tipe mapel).');
+            return;
+        }
+
+        // Use the summary export (No | Nama | Minggu 1-3 | Total)
+        return Excel::download(new PresensiSummaryExport($this->filters), 'rekap-presensi-summary-' . now()->format('Y-m-d') . '.xlsx');
     }
 
     public function exportPdf()
@@ -253,7 +267,26 @@ class GuruRiwayat extends Component
             'kelasList' => $kelasList,
             'sessions' => $sessions,
             'showMapelFilter' => $this->filters['tipe_sesi'] !== 'harian',
+            'canExportExcel' => $this->canExportExcel(),
         ]);
+    }
+
+    private function canExportExcel(): bool
+    {
+        // Allow export only when a quick range is selected and required filters are chosen
+        if (empty($this->filters['quick_range'])) {
+            return false;
+        }
+
+        if (empty($this->filters['tipe_sesi']) || empty($this->filters['kelas_id'])) {
+            return false;
+        }
+
+        if ($this->filters['tipe_sesi'] === 'mapel' && empty($this->filters['mapel_id'])) {
+            return false;
+        }
+
+        return true;
     }
 
     private function applySessionFilters($query): void
@@ -273,6 +306,36 @@ class GuruRiwayat extends Component
         }
     }
 
+    private function applyQuickRangeToDates(string $range): void
+    {
+        $now = Carbon::now();
+
+        switch ($range) {
+            case 'today':
+                $start = $now->copy()->startOfDay();
+                $end = $now->copy()->endOfDay();
+                break;
+            case 'week':
+                $start = $now->copy()->startOfWeek();
+                $end = $now->copy()->endOfWeek();
+                break;
+            case 'month':
+                $start = $now->copy()->startOfMonth();
+                $end = $now->copy()->endOfMonth();
+                break;
+            case 'semester':
+                // approximate semester as last 6 months including current month
+                $start = $now->copy()->subMonths(5)->startOfMonth();
+                $end = $now->copy()->endOfMonth();
+                break;
+            default:
+                return;
+        }
+
+        $this->filters['date_start'] = $start->toDateString();
+        $this->filters['date_end'] = $end->toDateString();
+    }
+
     private function normalizeFilters(): void
     {
         if (!$this->canAccessHarian) {
@@ -281,6 +344,11 @@ class GuruRiwayat extends Component
 
         if ($this->filters['tipe_sesi'] === 'harian') {
             $this->filters['mapel_id'] = '';
+        }
+
+        // If quick range is selected, compute date_start/date_end and disable manual range
+        if (!empty($this->filters['quick_range'])) {
+            $this->applyQuickRangeToDates($this->filters['quick_range']);
         }
 
         $allowedKelasIds = $this->getAllowedKelasIds();

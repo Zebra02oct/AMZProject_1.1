@@ -47,28 +47,30 @@ class GuruPresensi extends Component
             return;
         }
 
-        if (($this->latitude !== null && $this->longitude === null) || ($this->latitude === null && $this->longitude !== null)) {
-            session()->flash('error', 'Data lokasi tidak lengkap. Silakan coba mulai ulang sesi.');
+        // Sementara testing: lokasi wajib dari browser/laptop, jangan lanjut jika kosong.
+        if ($this->latitude === null || $this->longitude === null) {
+            $this->dispatch('swal-error', message: 'Lokasi belum terdeteksi. Aktifkan izin lokasi browser lalu coba lagi.');
             return;
         }
 
-        if ($this->latitude !== null && $this->longitude !== null) {
-            if (!is_numeric($this->latitude) || !is_numeric($this->longitude)) {
-                session()->flash('error', 'Format koordinat tidak valid.');
-                return;
-            }
-
-            $latitude = (float) $this->latitude;
-            $longitude = (float) $this->longitude;
-
-            if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
-                session()->flash('error', 'Koordinat lokasi di luar rentang yang valid.');
-                return;
-            }
-
-            $this->latitude = $latitude;
-            $this->longitude = $longitude;
+        if (!is_numeric($this->latitude) || !is_numeric($this->longitude)) {
+            $this->dispatch('swal-error', message: 'Format koordinat lokasi tidak valid.');
+            return;
         }
+
+        $latitude = (float) $this->latitude;
+        $longitude = (float) $this->longitude;
+
+        if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
+            $this->dispatch('swal-error', message: 'Koordinat lokasi di luar rentang yang valid.');
+            return;
+        }
+
+        $this->latitude = $latitude;
+        $this->longitude = $longitude;
+
+        // Manual host location mode dinonaktifkan sementara untuk testing.
+        // Jika ingin aktifkan lagi, kembalikan fallback null/null di sini.
 
         if (PresensiSession::guruActive(Auth::id())
             ->where('tipe_sesi', 'harian')

@@ -120,9 +120,21 @@ class PresensiExport implements FromCollection, WithHeadings, WithMapping
             $presensi->tanggal->format('d/m/Y'),
             $presensi->waktu_scan?->format('H:i'),
             ucfirst($presensi->status),
-            $presensi->status === 'tidak_hadir'
-                ? ($presensi->keterangan === 'sakit' ? 'Sakit' : 'Tanpa Keterangan')
-                : '-',
+            (function ($presensi) {
+                if ($presensi->status !== 'tidak_hadir') {
+                    return '-';
+                }
+
+                if ($presensi->keterangan === 'sakit') {
+                    return 'Sakit';
+                }
+
+                if ($presensi->keterangan === 'izin') {
+                    return 'Izin';
+                }
+
+                return 'Tanpa Keterangan';
+            })($presensi),
             $presensi->session->started_at->format('d/m/Y H:i'),
             $presensi->session->ended_at?->format('d/m/Y H:i') ?? '-'
         ];

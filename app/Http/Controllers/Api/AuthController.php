@@ -54,11 +54,10 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
-                // Masukkan data siswa (jika ada) langsung ke response
                 'siswa_data' => $user->siswa ? [
                     'id' => $user->siswa->id,
                     'nis' => $user->siswa->nis,
-                    'kelas_id' => $user->siswa->kelas_id,
+                    'nama_kelas' => $user->siswa->kelas->Name ?? '-',
                 ] : null,
             ],
             'token' => $token,
@@ -85,6 +84,7 @@ class AuthController extends Controller
                     'kelas_id' => $user->siswa->kelas_id,
                     'phone' => $user->siswa->phone ?? '-',
                     'address' => $user->siswa->address ?? '-',
+                    'nama_kelas' => $user->siswa->kelas->name ?? '-',
                 ] : null,
             ],
         ]);
