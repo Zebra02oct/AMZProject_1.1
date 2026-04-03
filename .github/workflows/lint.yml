@@ -13,8 +13,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    # environment: Testing # Komentari jika tidak ada settingan Environment di repo
-
+    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -34,10 +33,6 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      # Hapus bagian ini jika Anda TIDAK menggunakan Flux UI berbayar
-      - name: Add Flux Credentials from Secrets
-        run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
-
       - name: Install PHP Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress
 
@@ -45,11 +40,9 @@ jobs:
         run: npm ci
 
       - name: Run PHP Linting (Pint)
-        run: php ./vendor/bin/pint # Hapus --test agar dia otomatis memperbaiki
+        run: php ./vendor/bin/pint
 
-      # AKTIFKAN INI: Agar GitHub otomatis nge-commit file yang sudah dirapikan
       - name: Auto Commit Changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'style: fix code formatting with Pint'
-          commit_options: '--no-verify'
