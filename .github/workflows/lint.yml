@@ -2,13 +2,9 @@ name: linter
 
 on:
   push:
-    branches:
-      - develop
-      - main
+    branches: [ "develop", "main" ]
   pull_request:
-    branches:
-      - develop
-      - main
+    branches: [ "develop", "main" ]
 
 permissions:
   contents: write
@@ -17,8 +13,8 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    environment: Testing
-    
+    # environment: Testing # Komentari jika tidak ada settingan Environment di repo
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -38,6 +34,7 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
+      # Hapus bagian ini jika Anda TIDAK menggunakan Flux UI berbayar
       - name: Add Flux Credentials from Secrets
         run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
 
@@ -48,14 +45,11 @@ jobs:
         run: npm ci
 
       - name: Run PHP Linting (Pint)
-        run: php ./vendor/bin/pint --test
+        run: php ./vendor/bin/pint # Hapus --test agar dia otomatis memperbaiki
 
-      # Uncomment untuk auto-commit perubahan formatting
-      # - name: Auto Commit Changes
-      #   if: failure()
-      #   uses: stefanzweifel/git-auto-commit-action@v5
-      #   with:
-      #     commit_message: 'style: fix code formatting with Pint'
-      #     commit_options: '--no-verify'
-      #     file_pattern: 'app/ routes/ database/ config/ tests/'
-      #     push_options: '--force-with-lease'
+      # AKTIFKAN INI: Agar GitHub otomatis nge-commit file yang sudah dirapikan
+      - name: Auto Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'style: fix code formatting with Pint'
+          commit_options: '--no-verify'
